@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Takanori Ishikawa"]
   spec.email         = ["takanori.ishikawa@gmail.com"]
 
-  spec.homepage      = "https://rubygems.org/gems/chelsy"
+  spec.homepage      = "https://github.com/ishikawa/chelsy"
   spec.summary       = "C code generator"
   spec.description   = "C code generator written in Ruby (Work in progress)"
   spec.license       = "MIT"
