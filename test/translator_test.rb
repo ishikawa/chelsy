@@ -25,5 +25,11 @@ class Chelsy::TranslatorTest < Minitest::Test
 
     i = Constant::Long.new(1_000, unsigned: true, base: 8)
     assert_equal "01750lu", translator.translate(i)
+
+    # Unsupported radix
+    i = Constant::Long.new(1, base: 7)
+    assert_raises(ArgumentError) do
+      translator.translate(i)
+    end
   end
 end

@@ -20,12 +20,14 @@ module Chelsy
 
     def integer_prefix(node)
       case node.base
-      when 16
-        "0x"
       when 8
         "0"
-      else
+      when 10
         ""
+      when 16
+        "0x"
+      else
+        raise ArgumentError, "Unsupported radix: #{node.base}"
       end
     end
 
