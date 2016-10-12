@@ -3,9 +3,13 @@ require 'test_helper'
 class Chelsy::TranslatorTest < Minitest::Test
   include Chelsy
 
-  def test_integer
-    translator = Translator.new
+  attr_reader :translator
 
+  def setup
+    @translator = Translator.new
+  end
+
+  def test_integer
     i = Constant::Int.new(1)
     assert_equal "1", translator.translate(i)
 
