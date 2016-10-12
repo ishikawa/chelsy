@@ -6,6 +6,7 @@ module Chelsy
   class Element < Node
   end
 
+  # 6.4.4.1 Integer constants
   module Constant
 
     class Integral < Element
@@ -13,12 +14,12 @@ module Chelsy
 
       def initialize(value, unsigned: false, base: 10)
         @value = value
-        @unsigned = unsigned
+        @unsigned = !!unsigned
         @base = base
       end
 
       def unsigned?
-        !!@unsigned
+        @unsigned
       end
     end
 
