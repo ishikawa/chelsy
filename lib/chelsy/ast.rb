@@ -34,4 +34,22 @@ module Chelsy
 
   end
 
+  # 6.4.5 String literals
+  module Constant
+
+    class String < Element
+      attr_reader :value
+
+      def initialize(str, wide: false)
+        @value = str.dup.freeze
+        @wide = !!wide
+      end
+
+      def wide?
+        @wide
+      end
+    end
+
+  end
+
 end

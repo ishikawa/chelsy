@@ -36,4 +36,19 @@ class Chelsy::TranslatorTest < Minitest::Test
       translator.translate(i)
     end
   end
+
+  def test_string
+    s = Constant::String.new("")
+    assert_equal %q{""}, translator.translate(s)
+
+    s = Constant::String.new("Hello, World!\n")
+    assert_equal %q{"Hello, World!\n"}, translator.translate(s)
+
+    s = Constant::String.new(%q{"''"})
+    assert_equal %q{"\"''\""}, translator.translate(s)
+
+    s = Constant::String.new(%q{Wide string literal}, wide: true)
+    assert_equal %q{L"Wide string literal"}, translator.translate(s)
+  end
+
 end

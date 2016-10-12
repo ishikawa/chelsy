@@ -5,8 +5,10 @@ module Chelsy
       case node
       when Constant::Integral
         translate_integral(node)
+      when Constant::String
+        translate_string(node)
       else
-        raise "Unrecognized AST node: #{node}"
+        raise ArgumentError, "Unrecognized AST node: #{node}"
       end
     end
 
@@ -14,6 +16,14 @@ module Chelsy
 
     def translate_integral(node)
       integer_prefix(node) + node.value.to_s(node.base) + integer_suffix(node)
+    end
+
+    def translate_string(node)
+      if node.wide?
+        'L' + node.value.dump
+      else
+        node.value.dump
+      end
     end
 
     private
