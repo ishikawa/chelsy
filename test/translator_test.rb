@@ -51,4 +51,22 @@ class Chelsy::TranslatorTest < Minitest::Test
     assert_equal %q{L"Wide string literal"}, translator.translate(s)
   end
 
+  def test_function_call
+    # identifier ( args )
+    fc = FunctionCall.new(:abort, [])
+    assert_equal %q{abort()}, translator.translate(fc)
+
+    fc = FunctionCall.new(:printf, [Constant::String.new("Hello, World!\n")])
+    assert_equal %q{printf("Hello, World!\n")}, translator.translate(fc)
+
+    fc = FunctionCall.new(:exit, [Constant::Int.new(0)])
+    assert_equal %q{exit(0)}, translator.translate(fc)
+
+    # postfix-expr ( args )
+    f1 = FunctionCall.new(:f1, [])
+    f2 = FunctionCall.new(:f2, [])
+    f3 = FunctionCall.new(:f3, [])
+    fc = FunctionCall.new(f1, [f2, f3])
+    assert_equal %q{f1()(f2(), f3())}, translator.translate(fc)
+  end
 end

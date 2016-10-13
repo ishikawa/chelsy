@@ -3,16 +3,24 @@ module Chelsy
   class Translator
     def translate(node)
       case node
+      when Symbol
+        translate_ident(node)
       when Constant::Integral
         translate_integral(node)
       when Constant::String
         translate_string(node)
+      when FunctionCall
+        translate_function_call(node)
       else
-        raise ArgumentError, "Unrecognized AST node: #{node}"
+        raise ArgumentError, "Unrecognized AST node: #{node.inspect}"
       end
     end
 
     protected
+
+    def translate_ident(node)
+      node.to_s
+    end
 
     def translate_integral(node)
       integer_prefix(node) + node.value.to_s(node.base) + integer_suffix(node)
@@ -26,7 +34,20 @@ module Chelsy
       end
     end
 
+    def translate_function_call(node)
+      callee = expr(node.callee)
+      args = node.args.map {|a| expr(a) }.join(', ')
+
+      "#{callee}(#{args})"
+    end
+
     private
+
+    # Expression: parenthesize if needed
+    def expr(node)
+      # TODO Pointer expression should be parenthesized.
+      translate(node)
+    end
 
     def integer_prefix(node)
       case node.base

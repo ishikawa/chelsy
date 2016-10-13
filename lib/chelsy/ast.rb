@@ -6,10 +6,13 @@ module Chelsy
   class Element < Node
   end
 
+  class Expr < Element
+  end
+
   # 6.4.4.1 Integer constants
   module Constant
 
-    class Integral < Element
+    class Integral < Expr
       attr_reader :value, :base
 
       def initialize(value, unsigned: false, base: 10)
@@ -50,6 +53,16 @@ module Chelsy
       end
     end
 
+  end
+
+  # 6.5.2.2 Function calls
+  class FunctionCall < Expr
+    attr_reader :callee, :args
+
+    def initialize(callee, args)
+      @callee = callee
+      @args = args.dup
+    end
   end
 
 end
