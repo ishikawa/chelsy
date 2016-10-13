@@ -77,4 +77,9 @@ class Chelsy::TranslatorTest < Minitest::Test
     assert_equal ';', translator.translate(stmt)
   end
 
+  def test_expr_stmt
+    stmt = ExprStmt.new(Constant::Int.new(1))
+    assert_equal '1;', translator.translate(stmt)
+  end
+
 end

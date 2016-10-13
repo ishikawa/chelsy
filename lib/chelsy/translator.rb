@@ -17,6 +17,8 @@ module Chelsy
       # Statements
       when EmptyStmt
         translate_empty_stmt(node)
+      when ExprStmt
+        translate_expr_stmt(node)
 
       else
         raise ArgumentError, "Unrecognized AST node: #{node.inspect}"
@@ -54,6 +56,10 @@ module Chelsy
 
     def translate_empty_stmt(node)
       ';'
+    end
+
+    def translate_expr_stmt(node)
+      translate(node.expr) + ';'
     end
 
     private
