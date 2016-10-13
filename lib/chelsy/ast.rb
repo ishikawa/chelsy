@@ -1,3 +1,5 @@
+require "chelsy/syntax"
+
 module Chelsy
 
   class Node
@@ -7,6 +9,10 @@ module Chelsy
   end
 
   class Expr < Element
+  end
+
+  module Syntax
+    Expr = Any.new('Expression', [Expr, Symbol])
   end
 
   # 6.4.4.1 Integer constants
@@ -40,7 +46,7 @@ module Chelsy
   # 6.4.5 String literals
   module Constant
 
-    class String < Element
+    class String < Expr
       attr_reader :value
 
       def initialize(str, wide: false)
@@ -60,8 +66,8 @@ module Chelsy
     attr_reader :callee, :args
 
     def initialize(callee, args)
-      @callee = callee
-      @args = args.dup
+      @callee = Syntax::Expr.ensure(callee)
+      @args = args.map {|a| Syntax::Expr.ensure(a) }
     end
   end
 
@@ -80,7 +86,7 @@ module Chelsy
     attr_reader :expr
 
     def initialize(expr)
-      @expr = expr
+      @expr = Syntax::Expr.ensure(expr)
     end
   end
 
