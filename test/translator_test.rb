@@ -69,4 +69,12 @@ class Chelsy::TranslatorTest < Minitest::Test
     fc = FunctionCall.new(f1, [f2, f3])
     assert_equal %q{f1()(f2(), f3())}, translator.translate(fc)
   end
+
+  # = Statements and blocks
+
+  def test_null_stmt
+    stmt = EmptyStmt.new
+    assert_equal ';', translator.translate(stmt)
+  end
+
 end

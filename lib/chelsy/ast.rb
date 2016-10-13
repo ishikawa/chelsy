@@ -65,4 +65,15 @@ module Chelsy
     end
   end
 
+  # = 6.8 Statements and blocks
+
+  class Stmt < Element
+  end
+
+  # == 6.8.3 Expression and null statements
+
+  # A null statement (consisting of just a semicolon) performs no operations.
+  class EmptyStmt < Stmt
+  end
+
 end

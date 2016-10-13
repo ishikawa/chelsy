@@ -3,6 +3,8 @@ module Chelsy
   class Translator
     def translate(node)
       case node
+
+      # Expressions
       when Symbol
         translate_ident(node)
       when Constant::Integral
@@ -11,6 +13,11 @@ module Chelsy
         translate_string(node)
       when FunctionCall
         translate_function_call(node)
+
+      # Statements
+      when EmptyStmt
+        translate_empty_stmt(node)
+
       else
         raise ArgumentError, "Unrecognized AST node: #{node.inspect}"
       end
@@ -21,6 +28,8 @@ module Chelsy
     def translate_ident(node)
       node.to_s
     end
+
+    # = Expressions
 
     def translate_integral(node)
       integer_prefix(node) + node.value.to_s(node.base) + integer_suffix(node)
@@ -39,6 +48,12 @@ module Chelsy
       args = node.args.map {|a| expr(a) }.join(', ')
 
       "#{callee}(#{args})"
+    end
+
+    # = Statements
+
+    def translate_empty_stmt(node)
+      ';'
     end
 
     private
