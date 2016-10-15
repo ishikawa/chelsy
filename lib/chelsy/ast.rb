@@ -181,6 +181,15 @@ module Chelsy
     end
   end
 
+  # == 6.8.6.4 Thereturnstatement
+  class Return < Stmt
+    attr_reader :expr
+
+    def initialize(expr=nil)
+      @expr = Syntax::Expr.ensure(expr) if expr
+    end
+  end
+
   # = 6.9 External definitions
 
   # == 6.9.1 Function definition

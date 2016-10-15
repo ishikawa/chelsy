@@ -14,6 +14,14 @@ class Chelsy::ASTTest < Minitest::Test
     assert ExprStmt === f.body.first
   end
 
+  def test_return
+    ret = Return.new
+    assert_nil ret.expr
+
+    ret = Return.new(Constant::Int.new(1))
+    assert ret.expr
+  end
+
   # == Bad arguments
 
   def test_function_call
