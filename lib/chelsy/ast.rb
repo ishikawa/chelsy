@@ -19,6 +19,10 @@ module Chelsy
     def const?;    @const end
     def restrict?; @restrict end
     def volatile?; @volatile end
+
+    def qualified?
+      @const || @restrict || @volatile
+    end
   end
 
   class Declaration < Element
@@ -46,38 +50,92 @@ module Chelsy
     Type  = Any.new('TypeSpecifier', [Type, :void])
   end
 
-  # = Type specifiers
+  # = 6.2.5 Types
   module Types
-    class Int < Type
+    class Numeric < Type
     end
 
-    class Short < Type
+    # == _Bool
+    class Bool < Numeric
     end
 
-    class Char < Type
+    # == Integer types
+    class Integral < Numeric
+      def initialize(unsigned: false)
+        @unsigned = !!unsigned
+      end
+
+      def unsigned?; @unsigned end
     end
 
-    class Float < Type
+    class Char < Integral
     end
 
-    class Double < Type
+    class Short < Integral
     end
 
-    # _Bool
-    class Bool < Type
+    class Int < Integral
     end
 
-    # _Complex
-    class Complex < Type
+    class Long < Integral
     end
 
-    class Pointer < Type
+    class LongLong < Integral
+    end
+
+    # == Real floating types
+    class Real < Numeric
+    end
+
+    class Float < Real
+    end
+
+    class Double < Real
+    end
+
+    class LongDouble < Real
+    end
+
+    # == Complex types
+    class Complex < Numeric
+    end
+
+    class FloatComplex < Complex
+    end
+
+    class DoubleComplex < Complex
+    end
+
+    class LongDoubleComplex < Complex
+    end
+
+    # == Derived types
+    class Derived < Type
+    end
+
+    class Pointer < Derived
       attr_reader :pointee
 
       def initialize(pointee)
         @pointee = Syntax::Type.ensure(pointee)
       end
     end
+
+    class Array < Derived
+      attr_reader :element_type, :size
+
+      def initialize(element_type, size = nil)
+        @element_type = element_type
+        @size = size
+      end
+
+      # An array type of unknown size is an incomplete type.
+      def incomplete?; @size.nil? end
+    end
+
+    # TODO Function
+    # TODO Struct
+    # TODO Union
   end
 
   # 6.4.4.1 Integer constants
