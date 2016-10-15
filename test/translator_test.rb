@@ -82,4 +82,32 @@ class Chelsy::TranslatorTest < Minitest::Test
     assert_equal '1;', translator.translate(stmt)
   end
 
+  # = Function definition
+  def test_types
+    ty = Types::Int.new
+    assert_equal 'int', translator.translate(ty)
+    ty = Types::Int.new(unsigned: true)
+    assert_equal 'unsigned int', translator.translate(ty)
+    ty = Types::Int.new(unsigned: true, const: true)
+    assert_equal 'const unsigned int', translator.translate(ty)
+    ty = Types::Int.new(unsigned: true, const: true, volatile: true)
+    assert_equal 'volatile const unsigned int', translator.translate(ty)
+    ty = Types::Int.new(unsigned: true, const: true, volatile: true, restrict: true)
+    assert_equal 'restrict volatile const unsigned int', translator.translate(ty)
+  end
+
+  def test_function_definitions
+    f = Function.new(:main, Types::Int.new, [:void]) do |b|
+      b << FunctionCall.new(:printf, [Constant::String.new("Hello, World!\n")])
+      b << Return.new(Constant::Int.new(0))
+    end
+
+    assert_equal <<PROG, translator.translate(f) + "\n"
+int main(void) {
+  printf("Hello, World!\\n");
+  return 0;
+}
+PROG
+  end
+
 end

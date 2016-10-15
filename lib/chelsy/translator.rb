@@ -4,6 +4,10 @@ module Chelsy
     def translate(node)
       case node
 
+      # Types
+      when Type
+        translate_type(node)
+
       # Expressions
       when Symbol
         translate_ident(node)
@@ -19,6 +23,16 @@ module Chelsy
         translate_empty_stmt(node)
       when ExprStmt
         translate_expr_stmt(node)
+      when Return
+        translate_return(node)
+      when Block
+        translate_block(node)
+
+      # Definition
+      when Function
+        translate_function(node)
+      when Param
+        translate_function_param(node)
 
       else
         raise ArgumentError, "Unrecognized AST node: #{node.inspect}"
@@ -29,6 +43,51 @@ module Chelsy
 
     def translate_ident(node)
       node.to_s
+    end
+
+    # = Types
+
+    def translate_type(ty)
+      translate_typed_name(ty)
+    end
+
+    def translate_typed_name(ty, name=nil)
+      case ty
+      when Types::Derived
+        # TODO
+        raise NotImplementedError
+      else
+        translate_primitive_type(ty).tap do |src|
+          src << " #{name}" if name
+        end
+      end
+    end
+
+    def translate_primitive_type(ty)
+      case ty
+      when :void; 'void'
+      when Types::Char; 'char'
+      when Types::Short; 'short'
+      when Types::Integral
+        translate_integral_type(ty)
+      end.tap do |src|
+        # qualifiers
+        src.insert(0, 'const ') if ty.const?
+        src.insert(0, 'volatile ') if ty.volatile?
+        src.insert(0, 'restrict ') if ty.restrict?
+      end
+    end
+
+    def translate_integral_type(ty)
+      case ty
+      when Types::Char;     'char'
+      when Types::Short;    'short'
+      when Types::Int;      'int'
+      when Types::Long;     'long'
+      when Types::LongLong; 'long long'
+      end.tap do |src|
+        src.insert(0, 'unsigned ') if ty.unsigned?
+      end
     end
 
     # = Expressions
@@ -59,7 +118,32 @@ module Chelsy
     end
 
     def translate_expr_stmt(node)
-      translate(node.expr) + ';'
+      translate(node.expr) << ';'
+    end
+
+    def translate_return(node)
+      if node.expr
+        'return ' << translate(node.expr) << ';'
+      else
+        'return;'
+      end
+    end
+
+    def translate_block(node)
+      # TODO Manage indentation
+      body = node.map {|item| '  ' + translate(item) }.join("\n")
+      "{\n#{body}\n}"
+    end
+
+    # = Statements
+
+    def translate_function(node)
+      params = node.params.map {|p| translate(p) }.join(', ')
+      "#{translate node.return_type} #{translate node.name}(#{params}) #{translate(node.body)}"
+    end
+
+    def translate_function_param(node)
+      translate_typed_name(node.type, node.name)
     end
 
     private

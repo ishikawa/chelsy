@@ -61,8 +61,9 @@ module Chelsy
 
     # == Integer types
     class Integral < Numeric
-      def initialize(unsigned: false)
+      def initialize(unsigned: false, **rest)
         @unsigned = !!unsigned
+        super **rest
       end
 
       def unsigned?; @unsigned end
