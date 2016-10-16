@@ -143,8 +143,10 @@ module Chelsy
 
   # 6.4.4.1 Integer constants
   module Constant
+    class Base < Expr
+    end
 
-    class Integral < Expr
+    class Integral < Base
       attr_reader :value, :base
 
       def initialize(value, unsigned: false, base: 10)
@@ -172,7 +174,7 @@ module Chelsy
   # 6.4.5 String literals
   module Constant
 
-    class String < Expr
+    class String < Base
       attr_reader :value
 
       def initialize(str, wide: false)
