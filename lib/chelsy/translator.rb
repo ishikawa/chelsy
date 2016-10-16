@@ -12,7 +12,7 @@ module Chelsy
       case node
 
       # Types
-      when Type
+      when Type::Base
         translate_type(node)
 
       # Expressions
@@ -60,7 +60,7 @@ module Chelsy
 
     def translate_typed_name(ty, name=nil)
       case ty
-      when Types::Derived
+      when Type::Derived
         # TODO
         raise NotImplementedError
       else
@@ -73,9 +73,9 @@ module Chelsy
     def translate_primitive_type(ty)
       case ty
       when :void; 'void'
-      when Types::Char; 'char'
-      when Types::Short; 'short'
-      when Types::Integral
+      when Type::Char; 'char'
+      when Type::Short; 'short'
+      when Type::Integral
         translate_integral_type(ty)
       end.tap do |src|
         # qualifiers
@@ -87,11 +87,11 @@ module Chelsy
 
     def translate_integral_type(ty)
       case ty
-      when Types::Char;     'char'
-      when Types::Short;    'short'
-      when Types::Int;      'int'
-      when Types::Long;     'long'
-      when Types::LongLong; 'long long'
+      when Type::Char;     'char'
+      when Type::Short;    'short'
+      when Type::Int;      'int'
+      when Type::Long;     'long'
+      when Type::LongLong; 'long long'
       end.tap do |src|
         src.insert(0, 'unsigned ') if ty.unsigned?
       end

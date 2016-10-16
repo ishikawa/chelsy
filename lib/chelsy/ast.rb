@@ -8,22 +8,6 @@ module Chelsy
   class Element < Node
   end
 
-  class Type < Element
-    def initialize(const: false, restrict: false, volatile: false)
-      @const = !!const
-      @restrict = !!restrict
-      @volatile = !!volatile
-    end
-
-    def const?;    @const end
-    def restrict?; @restrict end
-    def volatile?; @volatile end
-
-    def qualified?
-      @const || @restrict || @volatile
-    end
-  end
-
   class Declaration < Element
   end
 
@@ -46,12 +30,27 @@ module Chelsy
   module Syntax
     Ident = Any.new('Identifier', [Symbol])
     Expr  = Any.new('Expression', [Expr, Symbol])
-    Type  = Any.new('TypeSpecifier', [Type, :void])
   end
 
   # = 6.2.5 Types
-  module Types
-    class Numeric < Type
+  module Type
+    class Base < Element
+      def initialize(const: false, restrict: false, volatile: false)
+        @const = !!const
+        @restrict = !!restrict
+        @volatile = !!volatile
+      end
+
+      def const?;    @const end
+      def restrict?; @restrict end
+      def volatile?; @volatile end
+
+      def qualified?
+        @const || @restrict || @volatile
+      end
+    end
+
+    class Numeric < Base
     end
 
     # == _Bool
@@ -110,7 +109,7 @@ module Chelsy
     end
 
     # == Derived types
-    class Derived < Type
+    class Derived < Base
     end
 
     class Pointer < Derived
@@ -136,6 +135,10 @@ module Chelsy
     # TODO Function
     # TODO Struct
     # TODO Union
+  end
+
+  module Syntax
+    Type = Any.new('TypeSpecifier', [Chelsy::Type::Base, :void])
   end
 
   # 6.4.4.1 Integer constants

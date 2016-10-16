@@ -103,20 +103,20 @@ PROG
 
   # = Function definition
   def test_types
-    ty = Types::Int.new
+    ty = Type::Int.new
     assert_equal 'int', translator.translate(ty)
-    ty = Types::Int.new(unsigned: true)
+    ty = Type::Int.new(unsigned: true)
     assert_equal 'unsigned int', translator.translate(ty)
-    ty = Types::Int.new(unsigned: true, const: true)
+    ty = Type::Int.new(unsigned: true, const: true)
     assert_equal 'const unsigned int', translator.translate(ty)
-    ty = Types::Int.new(unsigned: true, const: true, volatile: true)
+    ty = Type::Int.new(unsigned: true, const: true, volatile: true)
     assert_equal 'volatile const unsigned int', translator.translate(ty)
-    ty = Types::Int.new(unsigned: true, const: true, volatile: true, restrict: true)
+    ty = Type::Int.new(unsigned: true, const: true, volatile: true, restrict: true)
     assert_equal 'restrict volatile const unsigned int', translator.translate(ty)
   end
 
   def test_function_definitions
-    f = Function.new(:main, Types::Int.new, [:void]) do |b|
+    f = Function.new(:main, Type::Int.new, [:void]) do |b|
       b << FunctionCall.new(:printf, [Constant::String.new("Hello, World!\n")])
       b << Return.new(Constant::Int.new(0))
     end

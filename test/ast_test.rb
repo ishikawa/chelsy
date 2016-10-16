@@ -42,7 +42,7 @@ class Chelsy::ASTTest < Minitest::Test
 
   def test_function_param
     assert_raises(ArgumentError) do
-      Param.new(EmptyStmt.new, Types::Int.new)
+      Param.new(EmptyStmt.new, Type::Int.new)
     end
 
     assert_raises(ArgumentError) do
