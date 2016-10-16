@@ -27,7 +27,7 @@ class Chelsy::ASTTest < Minitest::Test
     node = Constant::Int.new(1)
     node.fragments << "test!"
 
-    assert_equal ["test!"], node.fragments.to_a
+    assert_equal ["test!"], node.fragments.to_a 
   end
 
   # == Bad arguments

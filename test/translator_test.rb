@@ -102,6 +102,7 @@ PROG
   end
 
   # = Function definition
+
   def test_types
     ty = Type::Int.new
     assert_equal 'int', translator.translate(ty)
@@ -126,6 +127,17 @@ int main(void) {
     printf("Hello, World!\\n");
     return 0;
 }
+PROG
+  end
+
+  # = Source file inclusion
+
+  def test_source_file_inclusion
+    doc = Document.new
+    doc.fragments << Directive::Include.new("stdio.h", system: true)
+
+    assert_equal <<PROG, translator.translate(doc)
+#include <stdio.h>
 PROG
   end
 

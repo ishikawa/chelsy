@@ -3,21 +3,62 @@ module Chelsy
   class Translator
     attr_accessor :indent_string, :indent_level
 
+    DEFAULT_INDENT_STRING = '    '.freeze
+
     def initialize()
-      @indent_string = "    "
+      @indent_string = DEFAULT_INDENT_STRING
       @indent_level = 0
     end
 
     def translate(node)
       case node
+      when Element
+        translate_element(node)
+      when Node
+        translate_node(node)
+      when Symbol
+        translate_ident(node)
+      when String
+        translate_fragment(node)
+      else
+        raise ArgumentError, "Unrecognized AST node: #{node.inspect}"
+      end
+    end
+
+    protected
+
+    def translate_node(node)
+      case node
+      # Fragment
+      when Fragment
+        translate_fragment(node)
+      else
+        raise ArgumentError, "Unrecognized AST node: #{node.inspect}"
+      end
+    end
+
+    def translate_fragment(node)
+      case node
+      when String
+        node.to_s
+      when Directive::Include
+        translate_include(node)
+      else
+        raise ArgumentError, "Unrecognized AST fragment: #{node.inspect}"
+      end
+    end
+
+    def translate_element(node)
+      case node
+      # Document
+      when Document
+        translate_document(node)
 
       # Types
       when Type::Base
         translate_type(node)
 
       # Expressions
-      when Symbol
-        translate_ident(node)
       when Constant::Integral
         translate_integral(node)
       when Constant::String
@@ -42,11 +83,24 @@ module Chelsy
         translate_function_param(node)
 
       else
-        raise ArgumentError, "Unrecognized AST node: #{node.inspect}"
+        raise ArgumentError, "Unrecognized AST element: #{node.inspect}"
+      end
+      .tap do |src|
+        # Fragments
+        unless node.fragments.empty?
+          src.insert 0, "\n"
+          src.insert 0, node.fragments.map {|f| translate_fragment(f) }.join("\n")
+        end
+        unless node.post_fragments.empty?
+          src << "\n"
+          src << node.post_fragments.map {|f| translate_fragment(f) }.join("\n")
+        end
       end
     end
 
-    protected
+    def translate_document(node)
+      node.map {|nd| translate(nd) }.join('')
+    end
 
     def translate_ident(node)
       node.to_s
@@ -142,6 +196,15 @@ module Chelsy
       @indent_level -= 1
 
       "#{indent}{\n#{body}\n#{indent}}"
+    end
+
+    # = Directives
+    def translate_include(node)
+      if node.system?
+        "#include <#{node.location}>"
+      else
+        %Q{#include "#{node.location}"}
+      end
     end
 
     # = Statements

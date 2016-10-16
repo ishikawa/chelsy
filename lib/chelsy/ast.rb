@@ -16,9 +16,8 @@ module Chelsy
       self
     end
 
-    def size
-      items.size
-    end
+    def size; items.size end
+    def empty?; items.empty? end
 
     def <<(node)
       items << validate_node(node)
@@ -83,8 +82,23 @@ module Chelsy
   end
 
   module Syntax
-    Ident = Any.new('Identifier', [Symbol])
-    Expr  = Any.new('Expression', [Expr, Symbol])
+    Ident    = Any.new('Identifier', [Symbol])
+    Expr     = Any.new('Expression', [Expr, Symbol])
+    TopLevel = Any.new('TopLevel', [Definition, Declaration])
+  end
+
+  # `Document` represents a _translation unit_ (file).
+  class Document < Element
+    include NodeList
+
+    def initialize(**rest)
+      @items = []
+      super(**rest)
+    end
+
+    private
+    def items; @items end
+    def validate_node(node); Syntax::TopLevel.ensure(node) end
   end
 
   # = 6.2.5 Types
@@ -373,5 +387,25 @@ module Chelsy
       super(**rest)
     end
   end
+
+  # = 6.10 Preprocessing directives
+  module Directive
+    class Base < Fragment
+    end
+
+    class Include < Base
+      attr_reader :location
+
+      def initialize(location, system: false, **rest)
+        @location = location.to_s.dup
+        @system = !!system
+      end
+
+      # If `true`, this fragment forms `#include <...>`.
+      # otherwise, this fragment forms `#include "..."`.
+      def system?; @system end
+    end
+  end
+
 
 end
