@@ -22,6 +22,14 @@ class Chelsy::ASTTest < Minitest::Test
     assert ret.expr
   end
 
+  # == Fragment
+  def test_expr_with_fragment
+    node = Constant::Int.new(1)
+    node.fragments << "test!"
+
+    assert_equal ["test!"], node.fragments.to_a
+  end
+
   # == Bad arguments
 
   def test_function_call

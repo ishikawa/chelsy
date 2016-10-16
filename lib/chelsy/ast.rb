@@ -3,18 +3,65 @@ require "chelsy/syntax"
 module Chelsy
 
   class Node
+    def initialize(**opts)
+    end
   end
 
+  class Fragment < Node
+  end
+
+  module Syntax
+    Fragment = Any.new('Fragment', [Fragment, String])
+  end
+
+  class FragmentList < Node
+    include Enumerable
+
+    def initialize(**rest)
+      @fragments = []
+
+      super(**rest)
+    end
+
+    def each(&block)
+      @fragments.each(&block)
+      self
+    end
+
+    def size
+      @fragments.size
+    end
+
+    def <<(node)
+      @fragments << Syntax::Fragment.ensure(node)
+      self
+    end
+  end
+
+  # `Element` can have multiple `Fragment`s
+  #
+  # - `fragments` is an instace of `FragmentList` holds `Fragment`s which stands above `Element`.
+  # - `post_fragments` holds `Fragment`s which stands below `Element`.
   class Element < Node
+    attr_reader :fragments, :post_fragments
+
+    def initialize(**rest)
+      @fragments = FragmentList.new
+      @post_fragments = FragmentList.new
+
+      super(**rest)
+    end
   end
 
   class Declaration < Element
   end
 
   class Definition < Element
-    def initialize(extern: false, static: false)
+    def initialize(extern: false, static: false, **rest)
       @extern = !!extern
       @static = !!static
+
+      super(**rest)
     end
 
     def extern?; @extern end
@@ -35,10 +82,12 @@ module Chelsy
   # = 6.2.5 Types
   module Type
     class Base < Element
-      def initialize(const: false, restrict: false, volatile: false)
+      def initialize(const: false, restrict: false, volatile: false, **rest)
         @const = !!const
         @restrict = !!restrict
         @volatile = !!volatile
+
+        super(**rest)
       end
 
       def const?;    @const end
@@ -61,7 +110,7 @@ module Chelsy
     class Integral < Numeric
       def initialize(unsigned: false, **rest)
         @unsigned = !!unsigned
-        super **rest
+        super(**rest)
       end
 
       def unsigned?; @unsigned end
@@ -115,17 +164,20 @@ module Chelsy
     class Pointer < Derived
       attr_reader :pointee
 
-      def initialize(pointee)
+      def initialize(pointee, **rest)
         @pointee = Syntax::Type.ensure(pointee)
+        super(**rest)
       end
     end
 
     class Array < Derived
       attr_reader :element_type, :size
 
-      def initialize(element_type, size = nil)
+      def initialize(element_type, size = nil, **rest)
         @element_type = element_type
         @size = size
+
+        super(**rest)
       end
 
       # An array type of unknown size is an incomplete type.
@@ -149,10 +201,12 @@ module Chelsy
     class Integral < Base
       attr_reader :value, :base
 
-      def initialize(value, unsigned: false, base: 10)
+      def initialize(value, unsigned: false, base: 10, **rest)
         @value = value
         @unsigned = !!unsigned
         @base = base
+
+        super(**rest)
       end
 
       def unsigned?
@@ -177,9 +231,11 @@ module Chelsy
     class String < Base
       attr_reader :value
 
-      def initialize(str, wide: false)
+      def initialize(str, wide: false, **rest)
         @value = str.dup.freeze
         @wide = !!wide
+
+        super(**rest)
       end
 
       def wide?
@@ -193,9 +249,11 @@ module Chelsy
   class FunctionCall < Expr
     attr_reader :callee, :args
 
-    def initialize(callee, args)
+    def initialize(callee, args, **rest)
       @callee = Syntax::Expr.ensure(callee)
       @args = args.map {|a| Syntax::Expr.ensure(a) }
+
+      super(**rest)
     end
   end
 
@@ -210,8 +268,10 @@ module Chelsy
   class ExprStmt < Stmt
     attr_reader :expr
 
-    def initialize(expr)
+    def initialize(expr, **rest)
       @expr = Syntax::Expr.ensure(expr)
+
+      super(**rest)
     end
   end
 
@@ -223,8 +283,10 @@ module Chelsy
   class Block < Stmt
     include Enumerable
 
-    def initialize()
+    def initialize(**rest)
       @items = []
+
+      super(**rest)
     end
 
     def each(&block)
@@ -253,8 +315,10 @@ module Chelsy
   class Return < Stmt
     attr_reader :expr
 
-    def initialize(expr=nil)
+    def initialize(expr=nil, **rest)
       @expr = Syntax::Expr.ensure(expr) if expr
+
+      super(**rest)
     end
   end
 
@@ -270,11 +334,11 @@ module Chelsy
   class Param < Element
     attr_reader :name, :type
 
-    def initialize(name, type, register: false)
+    def initialize(name, type, register: false, **rest)
       @name = Syntax::Ident.ensure(name)
       @type = Syntax::Type.ensure(type)
 
-      super
+      super(**rest)
     end
   end
 
