@@ -63,6 +63,8 @@ module Chelsy
         translate_integral(node)
       when Constant::String
         translate_string(node)
+      when Subscription
+        translate_subscription(node)
       when FunctionCall
         translate_function_call(node)
 
@@ -163,6 +165,13 @@ module Chelsy
       else
         node.value.dump
       end
+    end
+
+    def translate_subscription(node)
+      subscriptee = expr(node.subscriptee)
+      index = translate(node.index)
+
+      "#{subscriptee}[#{index}]"
     end
 
     def translate_function_call(node)

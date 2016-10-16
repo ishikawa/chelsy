@@ -70,6 +70,16 @@ PROG
     assert_equal %q{L"Wide string literal"}, translator.translate(s)
   end
 
+  # Expressions
+
+  def test_array_subscption
+    sub = Subscription.new(:x, Constant::Int.new(3))
+    assert_equal 'x[3]', translator.translate(sub)
+
+    sub = Subscription.new(sub, Constant::Int.new(5))
+    assert_equal 'x[3][5]', translator.translate(sub)
+  end
+
   def test_function_call
     # identifier ( args )
     fc = FunctionCall.new(:abort, [])

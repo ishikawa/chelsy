@@ -267,7 +267,21 @@ module Chelsy
 
   end
 
-  # 6.5.2.2 Function calls
+  # == 6.5.2 Array subscripting
+
+  # === 6.5.2.1 Array subscripting
+  class Subscription < Expr
+    attr_reader :subscriptee, :index
+
+    def initialize(subscriptee, index, **rest)
+      @subscriptee = Syntax::Expr.ensure(subscriptee)
+      @index = Syntax::Expr.ensure(index)
+
+      super(**rest)
+    end
+  end
+
+  # === 6.5.2.2 Function calls
   class FunctionCall < Expr
     attr_reader :callee, :args
 
