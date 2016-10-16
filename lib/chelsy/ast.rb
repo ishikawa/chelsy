@@ -1,5 +1,4 @@
 require "chelsy/syntax"
-require 'forwardable'
 
 module Chelsy
 
@@ -219,24 +218,29 @@ module Chelsy
   class Block < Stmt
     include Enumerable
 
-    extend Forwardable
-    def_delegators :@items, :size, :each
-
     def initialize()
       @items = []
+    end
+
+    def each(&block)
+      @items.each(&block)
+      self
+    end
+
+    def size
+      @items.size
     end
 
     # Append `node` to block item list
     #
     #   - Implicit convertion from Expr to ExprStmt
     def <<(node)
-      item = case node
-             when Expr
-               ExprStmt.new(node)
-             else
-               node
-             end
+      item = node
+      item = ExprStmt.new(node) if Syntax::Expr.accept?(node)
+
       @items << Syntax::BlockItem.ensure(item)
+
+      self
     end
   end
 

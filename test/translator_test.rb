@@ -9,6 +9,25 @@ class Chelsy::TranslatorTest < Minitest::Test
     @translator = Translator.new
   end
 
+  def test_indent
+    translator.indent_string = ' '
+    translator.indent_level = 1
+    assert_equal ' ;', translator.translate(EmptyStmt.new)
+
+    # blocks
+    b = Block.new << (Block.new << :x)
+
+    translator.indent_string = "  "
+    translator.indent_level = 0
+    assert_equal <<PROG, translator.translate(b) + "\n"
+{
+  {
+    x;
+  }
+}
+PROG
+  end
+
   def test_integer
     i = Constant::Int.new(1)
     assert_equal "1", translator.translate(i)
@@ -104,8 +123,8 @@ class Chelsy::TranslatorTest < Minitest::Test
 
     assert_equal <<PROG, translator.translate(f) + "\n"
 int main(void) {
-  printf("Hello, World!\\n");
-  return 0;
+    printf("Hello, World!\\n");
+    return 0;
 }
 PROG
   end

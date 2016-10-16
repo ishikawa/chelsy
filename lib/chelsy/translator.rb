@@ -1,6 +1,13 @@
 module Chelsy
 
   class Translator
+    attr_accessor :indent_string, :indent_level
+
+    def initialize()
+      @indent_string = "    "
+      @indent_level = 0
+    end
+
     def translate(node)
       case node
 
@@ -114,25 +121,27 @@ module Chelsy
     # = Statements
 
     def translate_empty_stmt(node)
-      ';'
+      indent << ';'
     end
 
     def translate_expr_stmt(node)
-      translate(node.expr) << ';'
+      indent << translate(node.expr) << ';'
     end
 
     def translate_return(node)
       if node.expr
-        'return ' << translate(node.expr) << ';'
+        indent << 'return ' << translate(node.expr) << ';'
       else
-        'return;'
+        indent << 'return;'
       end
     end
 
     def translate_block(node)
-      # TODO Manage indentation
-      body = node.map {|item| '  ' + translate(item) }.join("\n")
-      "{\n#{body}\n}"
+      @indent_level += 1
+      body = node.map {|item| translate(item) }.join("\n")
+      @indent_level -= 1
+
+      "#{indent}{\n#{body}\n#{indent}}"
     end
 
     # = Statements
@@ -147,6 +156,10 @@ module Chelsy
     end
 
     private
+
+    def indent
+      @indent_string * @indent_level
+    end
 
     # Expression: parenthesize if needed
     def expr(node)
