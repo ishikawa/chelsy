@@ -67,6 +67,8 @@ module Chelsy
         translate_subscription(node)
       when FunctionCall
         translate_function_call(node)
+      when MemberAccess
+        translate_member_access(node)
 
       # Statements
       when EmptyStmt
@@ -179,6 +181,17 @@ module Chelsy
       args = node.args.map {|a| expr(a) }.join(', ')
 
       "#{callee}(#{args})"
+    end
+
+    def translate_member_access(node)
+      object = expr(node.object)
+      name = translate(node.name)
+
+      if node.indirect?
+        "#{object}->#{name}"
+      else
+        "#{object}.#{name}"
+      end
     end
 
     # = Statements

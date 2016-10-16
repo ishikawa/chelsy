@@ -293,6 +293,21 @@ module Chelsy
     end
   end
 
+  # 6.5.2.3 Structure and union members
+  class MemberAccess < Expr
+    attr_reader :object, :name
+
+    def initialize(object, name, indirect: false, **rest)
+      @object = Syntax::Expr.ensure(object)
+      @name = Syntax::Ident.ensure(name)
+      @indirect = !!indirect
+
+      super(**rest)
+    end
+
+    def indirect?; @indirect end
+  end
+
   # = 6.8 Statements and blocks
 
   # == 6.8.3 Expression and null statements

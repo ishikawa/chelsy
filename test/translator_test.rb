@@ -99,6 +99,18 @@ PROG
     assert_equal %q{f1()(f2(), f3())}, translator.translate(fc)
   end
 
+  def test_member_access
+    ma = MemberAccess.new(:s, :i)
+    assert_equal 's.i', translator.translate(ma)
+
+    ma = MemberAccess.new(:s, :i, indirect: true)
+    assert_equal 's->i', translator.translate(ma)
+
+    ma = MemberAccess.new(:u, :nf)
+    ma = MemberAccess.new(ma, :type)
+    assert_equal 'u.nf.type', translator.translate(ma)
+  end
+
   # = Statements and blocks
 
   def test_null_stmt
