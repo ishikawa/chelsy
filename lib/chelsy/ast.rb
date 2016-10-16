@@ -7,6 +7,25 @@ module Chelsy
     end
   end
 
+  # The class must provide a method `items` and `validate_node`
+  module NodeList
+    include Enumerable
+
+    def each(&block)
+      items.each(&block)
+      self
+    end
+
+    def size
+      items.size
+    end
+
+    def <<(node)
+      items << validate_node(node)
+      self
+    end
+  end
+
   class Fragment < Node
   end
 
@@ -15,27 +34,16 @@ module Chelsy
   end
 
   class FragmentList < Node
-    include Enumerable
+    include NodeList
 
     def initialize(**rest)
       @fragments = []
-
       super(**rest)
     end
 
-    def each(&block)
-      @fragments.each(&block)
-      self
-    end
-
-    def size
-      @fragments.size
-    end
-
-    def <<(node)
-      @fragments << Syntax::Fragment.ensure(node)
-      self
-    end
+    private
+    def items; @fragments end
+    def validate_node(node); Syntax::Fragment.ensure(node) end
   end
 
   # `Element` can have multiple `Fragment`s
@@ -281,33 +289,22 @@ module Chelsy
   end
 
   class Block < Stmt
-    include Enumerable
+    include NodeList
 
     def initialize(**rest)
       @items = []
-
       super(**rest)
     end
 
-    def each(&block)
-      @items.each(&block)
-      self
-    end
+    private
+    def items; @items end
 
-    def size
-      @items.size
-    end
-
-    # Append `node` to block item list
-    #
-    #   - Implicit convertion from Expr to ExprStmt
-    def <<(node)
+    # Implicit convertion from Expr to ExprStmt
+    def validate_node(node)
       item = node
       item = ExprStmt.new(node) if Syntax::Expr.accept?(node)
 
-      @items << Syntax::BlockItem.ensure(item)
-
-      self
+      Syntax::BlockItem.ensure(item)
     end
   end
 
@@ -346,13 +343,29 @@ module Chelsy
     Param = Any.new('Parameter', [Param, :void, :"..."])
   end
 
+  class ParamList < Element
+    include NodeList
+
+    def initialize(**rest)
+      @params = []
+      super(**rest)
+    end
+
+    private
+    def items; @params end
+    def validate_node(node); Syntax::Param.ensure(node) end
+  end
+
   class Function < Definition
     attr_reader :name, :return_type, :params, :body
 
     def initialize(name, return_type, params, inline: false, **rest, &block)
       @name = Syntax::Ident.ensure(name)
       @return_type = Syntax::Type.ensure(return_type)
-      @params = params.map {|p| Syntax::Param.ensure(p) }
+
+      @params = ParamList.new.tap do |list|
+        params.map {|p| list << p }
+      end
 
       @body = Block.new
       block.call(@body)
