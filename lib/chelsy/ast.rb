@@ -293,7 +293,7 @@ module Chelsy
     end
   end
 
-  # 6.5.2.3 Structure and union members
+  # === 6.5.2.3 Structure and union members
   class MemberAccess < Expr
     attr_reader :object, :name
 
@@ -306,6 +306,25 @@ module Chelsy
     end
 
     def indirect?; @indirect end
+  end
+
+  # === 6.5.2.4 Postfix increment and decrement operators
+  class PostfixIncrement < Expr
+    attr_reader :expr
+
+    def initialize(expr, **rest)
+      @expr = Syntax::Expr.ensure(expr)
+      super(**rest)
+    end
+  end
+
+  class PostfixDecrement < Expr
+    attr_reader :expr
+
+    def initialize(expr, **rest)
+      @expr = Syntax::Expr.ensure(expr)
+      super(**rest)
+    end
   end
 
   # = 6.8 Statements and blocks

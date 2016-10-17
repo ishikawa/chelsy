@@ -69,6 +69,10 @@ module Chelsy
         translate_function_call(node)
       when MemberAccess
         translate_member_access(node)
+      when PostfixIncrement
+        translate_postfix_increment(node)
+      when PostfixDecrement
+        translate_postfix_decrement(node)
 
       # Statements
       when EmptyStmt
@@ -194,6 +198,14 @@ module Chelsy
       end
     end
 
+    def translate_postfix_increment(node)
+      "#{expr(node.expr)}++"
+    end
+
+    def translate_postfix_decrement(node)
+      "#{expr(node.expr)}--"
+    end
+
     # = Statements
 
     def translate_empty_stmt(node)
@@ -246,9 +258,9 @@ module Chelsy
       @indent_string * @indent_level
     end
 
-    # Expression: parenthesize if needed
+    # Parenthesize if needed.
     def expr(node)
-      # TODO Pointer expression should be parenthesized.
+      # TODO Parenthesize if `node` has lower precedence.
       translate(node)
     end
 

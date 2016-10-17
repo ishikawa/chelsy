@@ -111,6 +111,16 @@ PROG
     assert_equal 'u.nf.type', translator.translate(ma)
   end
 
+  def test_postfix_incr_decr
+    node = PostfixIncrement.new(:x)
+    assert_equal 'x++', translator.translate(node)
+
+    node = PostfixDecrement.new(:x)
+    assert_equal 'x--', translator.translate(node)
+
+    # TODO incr/decr pointer expression should be `(*p)++`
+  end
+
   # = Statements and blocks
 
   def test_null_stmt
