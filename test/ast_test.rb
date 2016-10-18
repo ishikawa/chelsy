@@ -34,6 +34,7 @@ class Chelsy::ASTTest < Minitest::Test
   def test_precedence
     assert_equal Operator::Mul.precedence, Operator::Div.precedence
     assert_operator Operator::PostfixIncrement.precedence, :>, Operator::Mul.precedence
+    assert_operator Operator::Add.precedence, :<, Operator::Mul.precedence
   end
 
   # == Bad arguments

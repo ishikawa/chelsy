@@ -103,7 +103,7 @@ PROG
     ma = Operator::Access.new(:s, :i)
     assert_equal 's.i', translator.translate(ma)
 
-    ma = Operator::Access.new(:s, :i, indirect: true)
+    ma = Operator::IndirectAccess.new(:s, :i)
     assert_equal 's->i', translator.translate(ma)
 
     ma = Operator::Access.new(:u, :nf)
@@ -119,6 +119,11 @@ PROG
     assert_equal 'x--', translator.translate(node)
 
     # TODO incr/decr pointer expression should be `(*p)++`
+  end
+
+  def test_binary_ops
+    node = Operator::Mul.new(:x, :y)
+    assert_equal 'x * y', translator.translate(node)
   end
 
   # = Statements and blocks

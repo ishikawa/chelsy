@@ -63,16 +63,10 @@ module Chelsy
         translate_integral(node)
       when Constant::String
         translate_string(node)
-      when Operator::Subscription
-        translate_subscription(node)
-      when Operator::Call
-        translate_function_call(node)
-      when Operator::Access
-        translate_member_access(node)
-      when Operator::PostfixIncrement
-        translate_postfix_increment(node)
-      when Operator::PostfixDecrement
-        translate_postfix_decrement(node)
+      when Operator::Unary
+        translate_unary_operator(node)
+      when Operator::Binary
+        translate_binary_operator(node)
 
       # Statements
       when EmptyStmt
@@ -173,6 +167,23 @@ module Chelsy
       end
     end
 
+    def translate_unary_operator(node)
+      case node
+      when Operator::Subscription
+        translate_subscription(node)
+      when Operator::Call
+        translate_function_call(node)
+      when Operator::Access
+        translate_member_access(node)
+      else
+        if node.class.postfix?
+          translate_postfix_operator(node)
+        else
+          translate_prefix_operator(node)
+        end
+      end
+    end
+
     def translate_subscription(node)
       subscriptee = expr(node.subscriptee)
       index = translate(node.index)
@@ -191,19 +202,19 @@ module Chelsy
       object = expr(node.object)
       name = translate(node.name)
 
-      if node.indirect?
-        "#{object}->#{name}"
-      else
-        "#{object}.#{name}"
-      end
+      "#{object}#{node.class.operator}#{name}"
     end
 
-    def translate_postfix_increment(node)
-      "#{expr(node.operand)}++"
+    def translate_prefix_operator(node)
+      "#{node.class.operator}#{expr node.operand}"
     end
 
-    def translate_postfix_decrement(node)
-      "#{expr(node.operand)}--"
+    def translate_postfix_operator(node)
+      "#{expr node.operand}#{node.class.operator}"
+    end
+
+    def translate_binary_operator(node)
+      "#{expr node.lhs} #{node.class.operator} #{expr node.rhs}"
     end
 
     # = Statements

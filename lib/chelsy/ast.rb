@@ -269,10 +269,13 @@ module Chelsy
 
   module Operator
     class Base < Expr
+      def self.operator; nil end
     end
 
     class Unary < Base
       attr_reader :operand
+
+      def self.postfix?; false end
 
       def initialize(operand, **rest)
         @operand = Syntax::Expr.ensure(operand)
@@ -297,6 +300,8 @@ module Chelsy
     class Subscription < Unary
       attr_reader :index
 
+      def self.operator; :"[]" end
+
       def initialize(subscriptee, index, **rest)
         @index = Syntax::Expr.ensure(index)
         super subscriptee, **rest
@@ -308,6 +313,8 @@ module Chelsy
     # === 6.5.2.2 Function calls
     class Call < Unary
       attr_reader :args
+
+      def self.operator; :"()" end
 
       def initialize(callee, args, **rest)
         @args = args.map {|a| Syntax::Expr.ensure(a) }
@@ -322,38 +329,60 @@ module Chelsy
     class Access < Unary
       attr_reader :name
 
-      def initialize(object, name, indirect: false, **rest)
-        @name = Syntax::Ident.ensure(name)
-        @indirect = !!indirect
+      def self.operator; :"." end
 
+      def initialize(object, name, **rest)
+        @name = Syntax::Ident.ensure(name)
         super object, **rest
       end
 
       def object; operand end
-      def indirect?; @indirect end
+    end
+
+    class IndirectAccess < Access
+      def self.operator; :"->" end
     end
 
     # === 6.5.2.4 Postfix increment and decrement operators
     class PostfixIncrement < Unary
+      def self.operator; :"++" end
+      def self.postfix?; true end
     end
 
     class PostfixDecrement < Unary
+      def self.operator; :"--" end
+      def self.postfix?; true end
     end
 
     # == 6.5.5 Multiplicative operators
 
     # Multiplication
     class Mul < Binary
+      def self.operator; :* end
     end
 
-    # division
+    # Division
     class Div < Binary
+      def self.operator; :/ end
     end
 
-    # remainder
+    # Remainder
     class Rem < Binary
+      def self.operator; :% end
     end
 
+    # Addition
+    class Add < Binary
+      def self.operator; :+ end
+    end
+
+    # Subtraction
+    class Sub < Binary
+      def self.operator; :- end
+    end
+  end
+
+  module Operator
     # --- Operator precedence
     # The following table lists the precedence of operators.
     # Operators are listed top to bottom, in descending precedence.
@@ -369,15 +398,18 @@ module Chelsy
       ],
       [
         Mul, Div, Rem,
-      ]
+      ],
+      [
+        Add, Sub,
+      ],
     ]
 
     # This hash contains precedence value (Fixnum) by Operator::Base classes.
     # Higher precedence has higher value.
     OPERATOR_PRECEDENCE = {}.tap do |table|
-      PRECEDENCE_TABLE.reverse.each_with_index do |ops, index|
-        ops.each do |klass|
-          table[klass] = index
+      PRECEDENCE_TABLE.reverse.each_with_index do |op_classes, precedence|
+        op_classes.each do |klass|
+          table[klass] = precedence
         end
       end
     end
