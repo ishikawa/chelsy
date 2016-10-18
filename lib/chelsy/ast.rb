@@ -267,64 +267,79 @@ module Chelsy
 
   end
 
-  # == 6.5.2 Array subscripting
-
-  # === 6.5.2.1 Array subscripting
-  class Subscription < Expr
-    attr_reader :subscriptee, :index
-
-    def initialize(subscriptee, index, **rest)
-      @subscriptee = Syntax::Expr.ensure(subscriptee)
-      @index = Syntax::Expr.ensure(index)
-
-      super(**rest)
-    end
-  end
-
-  # === 6.5.2.2 Function calls
-  class FunctionCall < Expr
-    attr_reader :callee, :args
-
-    def initialize(callee, args, **rest)
-      @callee = Syntax::Expr.ensure(callee)
-      @args = args.map {|a| Syntax::Expr.ensure(a) }
-
-      super(**rest)
-    end
-  end
-
-  # === 6.5.2.3 Structure and union members
-  class MemberAccess < Expr
-    attr_reader :object, :name
-
-    def initialize(object, name, indirect: false, **rest)
-      @object = Syntax::Expr.ensure(object)
-      @name = Syntax::Ident.ensure(name)
-      @indirect = !!indirect
-
-      super(**rest)
+  module Operator
+    class Base < Expr
     end
 
-    def indirect?; @indirect end
-  end
+    class Unary < Base
+      attr_reader :operand
 
-  # === 6.5.2.4 Postfix increment and decrement operators
-  class PostfixIncrement < Expr
-    attr_reader :expr
-
-    def initialize(expr, **rest)
-      @expr = Syntax::Expr.ensure(expr)
-      super(**rest)
+      def initialize(operand, **rest)
+        @operand = Syntax::Expr.ensure(operand)
+        super **rest
+      end
     end
-  end
 
-  class PostfixDecrement < Expr
-    attr_reader :expr
+    class Binary < Base
+      attr_reader :lhs, :rhs
 
-    def initialize(expr, **rest)
-      @expr = Syntax::Expr.ensure(expr)
-      super(**rest)
+      def initialize(lhs, rhs, **rest)
+        @lhs = Syntax::Expr.ensure(lhs)
+        @rhs = Syntax::Expr.ensure(rhs)
+        super **rest
+      end
     end
+
+    class Ternary < Base
+    end
+
+    # === 6.5.2.1 Array subscripting
+    class Subscription < Unary
+      attr_reader :index
+
+      def initialize(subscriptee, index, **rest)
+        @index = Syntax::Expr.ensure(index)
+        super subscriptee, **rest
+      end
+
+      def subscriptee; operand end
+    end
+
+    # === 6.5.2.2 Function calls
+    class Call < Unary
+      attr_reader :args
+
+      def initialize(callee, args, **rest)
+        @args = args.map {|a| Syntax::Expr.ensure(a) }
+
+        super callee, **rest
+      end
+
+      def callee; operand end
+    end
+
+    # === 6.5.2.3 Structure and union members
+    class Access < Unary
+      attr_reader :name
+
+      def initialize(object, name, indirect: false, **rest)
+        @name = Syntax::Ident.ensure(name)
+        @indirect = !!indirect
+
+        super object, **rest
+      end
+
+      def object; operand end
+      def indirect?; @indirect end
+    end
+
+    # === 6.5.2.4 Postfix increment and decrement operators
+    class PostfixIncrement < Unary
+    end
+
+    class PostfixDecrement < Unary
+    end
+
   end
 
   # = 6.8 Statements and blocks

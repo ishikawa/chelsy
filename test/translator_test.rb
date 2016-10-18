@@ -73,49 +73,49 @@ PROG
   # Expressions
 
   def test_array_subscption
-    sub = Subscription.new(:x, Constant::Int.new(3))
+    sub = Operator::Subscription.new(:x, Constant::Int.new(3))
     assert_equal 'x[3]', translator.translate(sub)
 
-    sub = Subscription.new(sub, Constant::Int.new(5))
+    sub = Operator::Subscription.new(sub, Constant::Int.new(5))
     assert_equal 'x[3][5]', translator.translate(sub)
   end
 
   def test_function_call
     # identifier ( args )
-    fc = FunctionCall.new(:abort, [])
+    fc = Operator::Call.new(:abort, [])
     assert_equal %q{abort()}, translator.translate(fc)
 
-    fc = FunctionCall.new(:printf, [Constant::String.new("Hello, World!\n")])
+    fc = Operator::Call.new(:printf, [Constant::String.new("Hello, World!\n")])
     assert_equal %q{printf("Hello, World!\n")}, translator.translate(fc)
 
-    fc = FunctionCall.new(:exit, [Constant::Int.new(0)])
+    fc = Operator::Call.new(:exit, [Constant::Int.new(0)])
     assert_equal %q{exit(0)}, translator.translate(fc)
 
     # postfix-expr ( args )
-    f1 = FunctionCall.new(:f1, [])
-    f2 = FunctionCall.new(:f2, [])
-    f3 = FunctionCall.new(:f3, [])
-    fc = FunctionCall.new(f1, [f2, f3])
+    f1 = Operator::Call.new(:f1, [])
+    f2 = Operator::Call.new(:f2, [])
+    f3 = Operator::Call.new(:f3, [])
+    fc = Operator::Call.new(f1, [f2, f3])
     assert_equal %q{f1()(f2(), f3())}, translator.translate(fc)
   end
 
   def test_member_access
-    ma = MemberAccess.new(:s, :i)
+    ma = Operator::Access.new(:s, :i)
     assert_equal 's.i', translator.translate(ma)
 
-    ma = MemberAccess.new(:s, :i, indirect: true)
+    ma = Operator::Access.new(:s, :i, indirect: true)
     assert_equal 's->i', translator.translate(ma)
 
-    ma = MemberAccess.new(:u, :nf)
-    ma = MemberAccess.new(ma, :type)
+    ma = Operator::Access.new(:u, :nf)
+    ma = Operator::Access.new(ma, :type)
     assert_equal 'u.nf.type', translator.translate(ma)
   end
 
   def test_postfix_incr_decr
-    node = PostfixIncrement.new(:x)
+    node = Operator::PostfixIncrement.new(:x)
     assert_equal 'x++', translator.translate(node)
 
-    node = PostfixDecrement.new(:x)
+    node = Operator::PostfixDecrement.new(:x)
     assert_equal 'x--', translator.translate(node)
 
     # TODO incr/decr pointer expression should be `(*p)++`
@@ -150,7 +150,7 @@ PROG
 
   def test_function_definitions
     f = Function.new(:main, Type::Int.new, [:void]) do |b|
-      b << FunctionCall.new(:printf, [Constant::String.new("Hello, World!\n")])
+      b << Operator::Call.new(:printf, [Constant::String.new("Hello, World!\n")])
       b << Return.new(Constant::Int.new(0))
     end
 

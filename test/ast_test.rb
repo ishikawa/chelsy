@@ -5,7 +5,7 @@ class Chelsy::ASTTest < Minitest::Test
 
   def test_function_definitions
     f = Function.new(:f, :void, []) do |b|
-      b << FunctionCall.new(:printf, [Constant::String.new("Hello, World!\n")])
+      b << Operator::Call.new(:printf, [Constant::String.new("Hello, World!\n")])
     end
 
     assert f
@@ -27,18 +27,18 @@ class Chelsy::ASTTest < Minitest::Test
     node = Constant::Int.new(1)
     node.fragments << "test!"
 
-    assert_equal ["test!"], node.fragments.to_a 
+    assert_equal ["test!"], node.fragments.to_a
   end
 
   # == Bad arguments
 
   def test_function_call
     assert_raises(ArgumentError) do
-      FunctionCall.new(EmptyStmt.new, [])
+      Operator::Call.new(EmptyStmt.new, [])
     end
 
     assert_raises(ArgumentError) do
-      FunctionCall.new(:f, [EmptyStmt.new])
+      Operator::Call.new(:f, [EmptyStmt.new])
     end
   end
 

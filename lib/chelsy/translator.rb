@@ -63,15 +63,15 @@ module Chelsy
         translate_integral(node)
       when Constant::String
         translate_string(node)
-      when Subscription
+      when Operator::Subscription
         translate_subscription(node)
-      when FunctionCall
+      when Operator::Call
         translate_function_call(node)
-      when MemberAccess
+      when Operator::Access
         translate_member_access(node)
-      when PostfixIncrement
+      when Operator::PostfixIncrement
         translate_postfix_increment(node)
-      when PostfixDecrement
+      when Operator::PostfixDecrement
         translate_postfix_decrement(node)
 
       # Statements
@@ -199,11 +199,11 @@ module Chelsy
     end
 
     def translate_postfix_increment(node)
-      "#{expr(node.expr)}++"
+      "#{expr(node.operand)}++"
     end
 
     def translate_postfix_decrement(node)
-      "#{expr(node.expr)}--"
+      "#{expr(node.operand)}--"
     end
 
     # = Statements
