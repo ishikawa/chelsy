@@ -30,6 +30,12 @@ class Chelsy::ASTTest < Minitest::Test
     assert_equal ["test!"], node.fragments.to_a
   end
 
+  # == Precedence
+  def test_precedence
+    assert_equal Operator::Mul.precedence, Operator::Div.precedence
+    assert_operator Operator::PostfixIncrement.precedence, :>, Operator::Mul.precedence
+  end
+
   # == Bad arguments
 
   def test_function_call

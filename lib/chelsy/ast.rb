@@ -340,6 +340,53 @@ module Chelsy
     class PostfixDecrement < Unary
     end
 
+    # == 6.5.5 Multiplicative operators
+
+    # Multiplication
+    class Mul < Binary
+    end
+
+    # division
+    class Div < Binary
+    end
+
+    # remainder
+    class Rem < Binary
+    end
+
+    # --- Operator precedence
+    # The following table lists the precedence of operators.
+    # Operators are listed top to bottom, in descending precedence.
+
+    PRECEDENCE_TABLE = [
+      # -- highest
+      [
+        PostfixIncrement, PostfixDecrement,
+        Call,
+        Subscription,
+        Access,
+        # Compound Literal
+      ],
+      [
+        Mul, Div, Rem,
+      ]
+    ]
+
+    # This hash contains precedence value (Fixnum) by Operator::Base classes.
+    # Higher precedence has higher value.
+    OPERATOR_PRECEDENCE = {}.tap do |table|
+      PRECEDENCE_TABLE.reverse.each_with_index do |ops, index|
+        ops.each do |klass|
+          table[klass] = index
+        end
+      end
+    end
+
+    class Base
+      def self.precedence
+        OPERATOR_PRECEDENCE[self]
+      end
+    end
   end
 
   # = 6.8 Statements and blocks
