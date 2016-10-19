@@ -185,36 +185,40 @@ module Chelsy
     end
 
     def translate_subscription(node)
-      subscriptee = expr(node.subscriptee)
+      subscriptee = expr(node.subscriptee, node)
       index = translate(node.index)
 
       "#{subscriptee}[#{index}]"
     end
 
     def translate_function_call(node)
-      callee = expr(node.callee)
-      args = node.args.map {|a| expr(a) }.join(', ')
+      callee = expr(node.callee, node)
+      args = node.args.map {|a| translate(a) }.join(', ')
 
       "#{callee}(#{args})"
     end
 
     def translate_member_access(node)
-      object = expr(node.object)
+      object = expr(node.object, node)
       name = translate(node.name)
 
       "#{object}#{node.class.operator}#{name}"
     end
 
     def translate_prefix_operator(node)
-      "#{node.class.operator}#{expr node.operand}"
+      operand = expr(node.operand, node)
+      "#{node.class.operator}#{operand}"
     end
 
     def translate_postfix_operator(node)
-      "#{expr node.operand}#{node.class.operator}"
+      operand = expr(node.operand, node)
+      "#{operand}#{node.class.operator}"
     end
 
     def translate_binary_operator(node)
-      "#{expr node.lhs} #{node.class.operator} #{expr node.rhs}"
+      lhs = expr(node.lhs, node)
+      rhs = expr(node.rhs, node)
+      "#{lhs} #{node.class.operator} #{rhs}"
     end
 
     # = Statements
@@ -269,10 +273,15 @@ module Chelsy
       @indent_string * @indent_level
     end
 
-    # Parenthesize if needed.
-    def expr(node)
-      # TODO Parenthesize if `node` has lower precedence.
-      translate(node)
+    # Parenthesize if `node` has lower precedence than `parent` node.
+    def expr(node, parent)
+      expr = translate(node)
+
+      if node.is_a?(Operator::Base) && node.class.precedence < parent.class.precedence
+        "(#{expr})"
+      else
+        expr
+      end
     end
 
     def integer_prefix(node)

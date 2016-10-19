@@ -124,6 +124,13 @@ PROG
   def test_binary_ops
     node = Operator::Mul.new(:x, :y)
     assert_equal 'x * y', translator.translate(node)
+
+    node = Operator::Add.new(node, :z)
+    assert_equal 'x * y + z', translator.translate(node)
+
+    node = Operator::Add.new(:x, :y)
+    node = Operator::Mul.new(node, :z)
+    assert_equal '(x + y) * z', translator.translate(node)
   end
 
   # = Statements and blocks
