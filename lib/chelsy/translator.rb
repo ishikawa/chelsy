@@ -79,6 +79,8 @@ module Chelsy
         translate_block(node)
 
       # Definition
+      when Declaration, Typedef
+        translate_declaration(node)
       when Function
         translate_function(node)
       when Param
@@ -247,6 +249,35 @@ module Chelsy
       "#{indent}{\n#{body}\n#{indent}}"
     end
 
+    # = Declaration
+    def translate_declaration(node)
+      [
+        node.storage.to_s,
+        translate(node.type),
+        translate(node.name)
+      ]
+      .join(' ')
+      .strip << ';'
+    end
+
+    # = Function
+    def translate_function(node)
+      params = node.params.map {|p| translate(p) }.join(', ')
+
+      [
+        node.storage.to_s,
+        translate(node.return_type),
+        "#{translate node.name}(#{params})",
+        translate(node.body),
+      ]
+      .join(' ')
+      .strip
+    end
+
+    def translate_function_param(node)
+      translate_typed_name(node.type, node.name)
+    end
+
     # = Directives
     def translate_include(node)
       if node.system?
@@ -254,17 +285,6 @@ module Chelsy
       else
         %Q{#include "#{node.location}"}
       end
-    end
-
-    # = Statements
-
-    def translate_function(node)
-      params = node.params.map {|p| translate(p) }.join(', ')
-      "#{translate node.return_type} #{translate node.name}(#{params}) #{translate(node.body)}"
-    end
-
-    def translate_function_param(node)
-      translate_typed_name(node.type, node.name)
     end
 
     private

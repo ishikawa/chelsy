@@ -145,6 +145,17 @@ PROG
     assert_equal '1;', translator.translate(stmt)
   end
 
+  # = Declaration
+  def test_declaration
+    d = Declaration.new(:a, Type::Int.new)
+    assert_equal 'int a;', translator.translate(d)
+    d = Declaration.new(:b, Type::Int.new(unsigned: true, const: true), storage: :static)
+    assert_equal 'static const unsigned int b;', translator.translate(d)
+
+    t = Typedef.new(:cui, Type::Int.new(unsigned: true, const: true))
+    assert_equal 'typedef const unsigned int cui;', translator.translate(t)
+  end
+
   # = Function definition
 
   def test_types

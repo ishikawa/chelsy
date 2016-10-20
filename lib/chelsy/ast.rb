@@ -30,6 +30,9 @@ module Chelsy
 
   module Syntax
     Fragment = Any.new('Fragment', [Fragment, String])
+
+    # 6.7.1 Storage-class specifiers
+    Storage = Any.new('Storage-class specifiers', [:typedef, :extern, :static, nil])
   end
 
   class FragmentList < Node
@@ -60,19 +63,17 @@ module Chelsy
     end
   end
 
-  class Declaration < Element
-  end
+  class Declarative < Element
+    attr_reader :storage
 
-  class Definition < Element
-    def initialize(extern: false, static: false, **rest)
-      @extern = !!extern
-      @static = !!static
+    def initialize(storage: nil, **rest)
+      @storage = Syntax::Storage.ensure(storage)
 
       super(**rest)
     end
 
-    def extern?; @extern end
-    def static?; @static end
+    def extern?; @storage == :extern end
+    def static?; @storage == :static end
   end
 
   class Expr < Element
@@ -84,7 +85,7 @@ module Chelsy
   module Syntax
     Ident    = Any.new('Identifier', [Symbol])
     Expr     = Any.new('Expression', [Expr, Symbol])
-    TopLevel = Any.new('TopLevel', [Definition, Declaration])
+    TopLevel = Any.new('TopLevel', [Declarative])
   end
 
   # `Document` represents a _translation unit_ (file).
@@ -441,7 +442,7 @@ module Chelsy
 
   # == 6.8.2 Compound statement
   module Syntax
-    BlockItem = Any.new('BlockItem', [Stmt, Declaration])
+    BlockItem = Any.new('BlockItem', [Stmt, Declarative])
   end
 
   class Block < Stmt
@@ -471,6 +472,31 @@ module Chelsy
     def initialize(expr=nil, **rest)
       @expr = Syntax::Expr.ensure(expr) if expr
 
+      super(**rest)
+    end
+  end
+
+  # 6.7 Declarations
+  class Declaration < Declarative
+    attr_reader :name, :type
+    # TODO initializer
+
+    def initialize(name, type, **rest)
+      @name = Syntax::Ident.ensure(name)
+      @type = Syntax::Type.ensure(type)
+
+      super(**rest)
+    end
+  end
+
+  class Typedef < Declarative
+    attr_reader :name, :type
+
+    def initialize(name, type, **rest)
+      @name = Syntax::Ident.ensure(name)
+      @type = Syntax::Type.ensure(type)
+
+      rest[:storage] = :typedef
       super(**rest)
     end
   end
@@ -512,7 +538,7 @@ module Chelsy
     def validate_node(node); Syntax::Param.ensure(node) end
   end
 
-  class Function < Definition
+  class Function < Declarative
     attr_reader :name, :return_type, :params, :body
 
     def initialize(name, return_type, params, inline: false, **rest, &block)
