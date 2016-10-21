@@ -105,20 +105,18 @@ module Chelsy
   # = 6.2.5 Types
   module Type
     class Base < Element
-      def initialize(const: false, restrict: false, volatile: false, **rest)
+      def initialize(const: false, volatile: false, **rest)
         @const = !!const
-        @restrict = !!restrict
         @volatile = !!volatile
 
         super(**rest)
       end
 
       def const?;    @const end
-      def restrict?; @restrict end
       def volatile?; @volatile end
 
       def qualified?
-        @const || @restrict || @volatile
+        @const || @volatile
       end
     end
 
@@ -187,9 +185,17 @@ module Chelsy
     class Pointer < Derived
       attr_reader :pointee
 
-      def initialize(pointee, **rest)
+      def initialize(pointee, restrict: false, **rest)
         @pointee = Syntax::Type.ensure(pointee)
+        @restrict = !!restrict
+
         super(**rest)
+      end
+
+      def restrict?; @restrict end
+
+      def qualified?
+        @restrict || super
       end
     end
 
