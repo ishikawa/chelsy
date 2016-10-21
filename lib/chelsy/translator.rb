@@ -118,13 +118,30 @@ module Chelsy
 
     def translate_typed_name(ty, name=nil)
       case ty
+      when Type::Pointer
+        translate_pointer_type(ty)
       when Type::Derived
         # TODO
         raise NotImplementedError
       else
-        translate_primitive_type(ty).tap do |src|
-          src << " #{name}" if name
+        translate_primitive_type(ty)
+      end
+      .tap do |src|
+        src << " #{name}" if name
+        src.strip!
+      end
+    end
+
+    def translate_pointer_type(ty)
+      translate(ty.pointee).tap do |src|
+        # pointer to pointer (int **p)
+        unless ty.pointee.is_a?(Type::Pointer) && !ty.pointee.qualified?
+          src << ' '
         end
+        src << '*'
+        src << 'const ' if ty.const?
+        src << 'volatile ' if ty.volatile?
+        src << 'restrict ' if ty.restrict?
       end
     end
 
@@ -139,7 +156,6 @@ module Chelsy
         # qualifiers
         src.insert(0, 'const ') if ty.const?
         src.insert(0, 'volatile ') if ty.volatile?
-        src.insert(0, 'restrict ') if ty.restrict?
       end
     end
 

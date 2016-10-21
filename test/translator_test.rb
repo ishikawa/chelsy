@@ -70,7 +70,36 @@ PROG
     assert_equal %q{L"Wide string literal"}, translator.translate(s)
   end
 
-  # Expressions
+  # = Types
+
+  def test_types
+    ty = Type::Int.new
+    assert_equal 'int', translator.translate(ty)
+    ty = Type::Int.new(unsigned: true)
+    assert_equal 'unsigned int', translator.translate(ty)
+    ty = Type::Int.new(unsigned: true, const: true)
+    assert_equal 'const unsigned int', translator.translate(ty)
+    ty = Type::Int.new(unsigned: true, const: true, volatile: true)
+    assert_equal 'volatile const unsigned int', translator.translate(ty)
+  end
+
+  def test_derived_types
+    ty = Type::Pointer.new(Type::Int.new)
+    assert_equal 'int *', translator.translate(ty)
+    ty = Type::Pointer.new(Type::Int.new, const: true)
+    assert_equal 'int *const', translator.translate(ty)
+    ty = Type::Pointer.new(Type::Int.new(const: true), const: true)
+    assert_equal 'const int *const', translator.translate(ty)
+    ty = Type::Pointer.new(Type::Int.new, const: true, volatile: true, restrict: true)
+    assert_equal 'int *const volatile restrict', translator.translate(ty)
+
+    ty = Type::Pointer.new(Type::Pointer.new(Type::Int.new))
+    assert_equal 'int **', translator.translate(ty)
+    ty = Type::Pointer.new(Type::Pointer.new(Type::Int.new, const: true))
+    assert_equal 'int *const *', translator.translate(ty)
+  end
+
+  # = Expressions
 
   def test_array_subscption
     sub = Operator::Subscription.new(:x, Constant::Int.new(3))
@@ -146,6 +175,7 @@ PROG
   end
 
   # = Declaration
+
   def test_declaration
     d = Declaration.new(:a, Type::Int.new)
     assert_equal 'int a;', translator.translate(d)
@@ -157,19 +187,6 @@ PROG
   end
 
   # = Function definition
-
-  def test_types
-    ty = Type::Int.new
-    assert_equal 'int', translator.translate(ty)
-    ty = Type::Int.new(unsigned: true)
-    assert_equal 'unsigned int', translator.translate(ty)
-    ty = Type::Int.new(unsigned: true, const: true)
-    assert_equal 'const unsigned int', translator.translate(ty)
-    ty = Type::Int.new(unsigned: true, const: true, volatile: true)
-    assert_equal 'volatile const unsigned int', translator.translate(ty)
-    ty = Type::Int.new(unsigned: true, const: true, volatile: true, restrict: true)
-    assert_equal 'restrict volatile const unsigned int', translator.translate(ty)
-  end
 
   def test_function_definitions
     f = Function.new(:main, Type::Int.new, [:void]) do |b|
