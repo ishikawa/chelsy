@@ -119,21 +119,19 @@ module Chelsy
     def translate_typed_name(ty, name=nil)
       case ty
       when Type::Pointer
-        translate_pointer_type(ty)
-      when Type::Derived
-        # TODO
-        raise NotImplementedError
+        translate_pointer_type(ty, name)
+      when Type::Array
+        translate_array_type(ty, name)
       else
-        translate_primitive_type(ty)
+        translate_primitive_type(ty, name)
       end
       .tap do |src|
-        src << " #{name}" if name
         src.strip!
       end
     end
 
-    def translate_pointer_type(ty)
-      translate(ty.pointee).tap do |src|
+    def translate_pointer_type(ty, name=nil)
+      translate_typed_name(ty.pointee).tap do |src|
         # pointer to pointer (int **p)
         unless ty.pointee.is_a?(Type::Pointer) && !ty.pointee.qualified?
           src << ' '
@@ -142,10 +140,22 @@ module Chelsy
         src << 'const ' if ty.const?
         src << 'volatile ' if ty.volatile?
         src << 'restrict ' if ty.restrict?
+        src << " #{name}" if name
       end
     end
 
-    def translate_primitive_type(ty)
+    def translate_array_type(ty, name=nil)
+      translate_typed_name(ty.element_type, name).tap do |src|
+        src << '['
+        src << 'const ' if ty.const?
+        src << 'volatile ' if ty.volatile?
+        src << 'static ' if ty.static?
+        src << translate(ty.size) if ty.size
+        src << ']'
+      end
+    end
+
+    def translate_primitive_type(ty, name=nil)
       case ty
       when :void; 'void'
       when Type::Char; 'char'
@@ -156,6 +166,9 @@ module Chelsy
         # qualifiers
         src.insert(0, 'const ') if ty.const?
         src.insert(0, 'volatile ') if ty.volatile?
+      end
+      .tap do |src|
+        src << " #{name}" if name
       end
     end
 
@@ -269,8 +282,7 @@ module Chelsy
     def translate_declaration(node)
       [
         node.storage.to_s,
-        translate(node.type),
-        translate(node.name)
+        translate_typed_name(node.type, node.name),
       ]
       .join(' ')
       .strip << ';'

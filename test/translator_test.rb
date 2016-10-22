@@ -83,7 +83,7 @@ PROG
     assert_equal 'volatile const unsigned int', translator.translate(ty)
   end
 
-  def test_derived_types
+  def test_pointer_types
     ty = Type::Pointer.new(Type::Int.new)
     assert_equal 'int *', translator.translate(ty)
     ty = Type::Pointer.new(Type::Int.new, const: true)
@@ -97,6 +97,26 @@ PROG
     assert_equal 'int **', translator.translate(ty)
     ty = Type::Pointer.new(Type::Pointer.new(Type::Int.new, const: true))
     assert_equal 'int *const *', translator.translate(ty)
+  end
+
+  def test_array_type
+    ty = Type::Array.new(Type::Int.new)
+    assert_equal 'int[]', translator.translate(ty)
+
+    # variable length array type of unspecified size
+    ty = Type::Array.new(Type::Int.new, :*)
+    assert_equal 'int[*]', translator.translate(ty)
+
+    ty = Type::Array.new(Type::Int.new, Constant::Int.new(5))
+    assert_equal 'int[5]', translator.translate(ty)
+
+    # `static` in parameter array declarator
+    ty = Type::Array.new(Type::Int.new, Constant::Int.new(5), static: true)
+    assert_equal 'int[static 5]', translator.translate(ty)
+
+    # type qualifiers in parameter array declarator
+    ty = Type::Array.new(Type::Int.new, Constant::Int.new(5), const: true, static: true)
+    assert_equal 'int[const static 5]', translator.translate(ty)
   end
 
   # = Expressions
@@ -181,6 +201,8 @@ PROG
     assert_equal 'int a;', translator.translate(d)
     d = Declaration.new(:b, Type::Int.new(unsigned: true, const: true), storage: :static)
     assert_equal 'static const unsigned int b;', translator.translate(d)
+    d = Declaration.new(:C, Type::Array.new(Type::Array.new(Type::Int.new, :m), :m))
+    assert_equal 'int C[m][m];', translator.translate(d)
 
     t = Typedef.new(:cui, Type::Int.new(unsigned: true, const: true))
     assert_equal 'typedef const unsigned int cui;', translator.translate(t)

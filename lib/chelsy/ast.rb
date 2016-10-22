@@ -199,18 +199,36 @@ module Chelsy
       end
     end
 
+    # From: 6.7.5.3 Function declarators (including prototypes)
+    #
+    # qualifier in parameter array declarator
+    #
+    # > A declaration of a parameter as ‘‘array of type’’ shall be adjusted to
+    # > ‘‘qualified pointer to type’’, where the type qualifiers (if any) are
+    # > those specified within the [ and ] of the array type derivation.
+    #
+    # `static` in parameter array declarator
+    #
+    # > If the keyword static also appears within the [ and ] of the array type derivation,
+    # > then for each call to the function, the value of the corresponding actual argument shall
+    # > provide access to the first element of an array with at least as many elements as
+    # > specified by the size expression.
     class Array < Derived
       attr_reader :element_type, :size
 
-      def initialize(element_type, size = nil, **rest)
+      def initialize(element_type, size = nil, static: false, **rest)
         @element_type = element_type
         @size = size
+        @static = !!static
 
         super(**rest)
       end
 
       # An array type of unknown size is an incomplete type.
       def incomplete?; @size.nil? end
+      def variable?; @size == :* end
+
+      def static?; @static end
     end
 
     # TODO Function
