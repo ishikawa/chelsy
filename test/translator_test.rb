@@ -97,6 +97,10 @@ PROG
     assert_equal 'int **', translator.translate(ty)
     ty = Type::Pointer.new(Type::Pointer.new(Type::Int.new, const: true))
     assert_equal 'int *const *', translator.translate(ty)
+
+    # Function pointers
+    ty = Type::Function.new(Type::Int.new, [:void])
+    assert_equal 'int (*)(void)', translator.translate(ty)
   end
 
   def test_array_type
@@ -206,6 +210,39 @@ PROG
 
     t = Typedef.new(:cui, Type::Int.new(unsigned: true, const: true))
     assert_equal 'typedef const unsigned int cui;', translator.translate(t)
+  end
+
+  def test_function_declaration
+    d = Declaration.new(:f, Type::Function.new(Type::Int.new, [:void]))
+    assert_equal 'int f(void);', translator.translate(d)
+    d = Declaration.new(:f, Type::Function.new(Type::Pointer.new(Type::Int.new), [:void]))
+    assert_equal 'int *f(void);', translator.translate(d)
+    d = Declaration.new(:pfi, Type::Pointer.new(Type::Function.new(Type::Int.new, [])))
+    assert_equal 'int (*pfi)();', translator.translate(d)
+
+    f = Type::Function.new(Type::Int.new, [
+          Param.new(:x, Type::Int.new),
+          Param.new(:y, Type::Int.new),
+        ])
+    d = Declaration.new(:apfi, Type::Array.new(f, Constant::Int.new(3)))
+    assert_equal 'int (*apfi[3])(int x, int y);', translator.translate(d)
+
+    f = Type::Function.new(Type::Int.new, [
+          Type::Int.new(),
+          :"...",
+        ])
+    f = Type::Function.new(Type::Pointer.new(f), [
+          Type::Function.new(Type::Int.new, [Type::Long.new]),
+          Type::Int.new,
+        ])
+    d = Declaration.new(:fpfi, f)
+    assert_equal 'int (*fpfi(int (*)(long), int))(int, ...);', translator.translate(d)
+
+    f = Type::Function.new(Type::Int.new, [:void])
+    fp = Type::Pointer.new(Type::Pointer.new(f))
+    f = Type::Function.new(fp, [Type::Int.new])
+    d = Declaration.new(:fpp, f)
+    assert_equal 'int (**fpp(int))(void);', translator.translate(d)
   end
 
   # = Function definition

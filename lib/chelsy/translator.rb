@@ -122,6 +122,10 @@ module Chelsy
         translate_pointer_type(ty, name)
       when Type::Array
         translate_array_type(ty, name)
+      when Type::Function
+        translate_function_type(ty, name)
+      when Type::Derived
+        raise NotImplementedError
       else
         translate_primitive_type(ty, name)
       end
@@ -131,27 +135,80 @@ module Chelsy
     end
 
     def translate_pointer_type(ty, name=nil)
-      translate_typed_name(ty.pointee).tap do |src|
-        # pointer to pointer (int **p)
-        unless ty.pointee.is_a?(Type::Pointer) && !ty.pointee.qualified?
-          src << ' '
-        end
-        src << '*'
-        src << 'const ' if ty.const?
-        src << 'volatile ' if ty.volatile?
-        src << 'restrict ' if ty.restrict?
-        src << " #{name}" if name
+      pointee = ty
+      src = ''
+
+      while pointee.is_a?(Type::Pointer)
+        qualifier = '*'
+        qualifier << 'const '    if pointee.const?
+        qualifier << 'volatile ' if pointee.volatile?
+        qualifier << 'restrict ' if pointee.restrict?
+
+        pointee = pointee.pointee
+        src.insert 0, qualifier
+      end
+
+      src.strip!
+      src << name.to_s if name
+
+      case pointee
+      when Type::Function
+        translate_function_type(pointee, "(#{src})")
+      when Type::Array
+        translate_array_type(pointee, "(#{src})")
+      else
+        translate_typed_name(pointee, src)
       end
     end
 
     def translate_array_type(ty, name=nil)
-      translate_typed_name(ty.element_type, name).tap do |src|
-        src << '['
-        src << 'const ' if ty.const?
-        src << 'volatile ' if ty.volatile?
-        src << 'static ' if ty.static?
-        src << translate(ty.size) if ty.size
-        src << ']'
+      element_type = ty
+      src = ''
+
+      while element_type.is_a?(Type::Array)
+        subscription = '['
+        subscription << 'const ' if element_type.const?
+        subscription << 'volatile ' if element_type.volatile?
+        subscription << 'static ' if element_type.static?
+        subscription << translate(element_type.size) if element_type.size
+        subscription << ']'
+
+        element_type = element_type.element_type
+        src.insert 0, subscription
+      end
+
+      src.insert 0, name.to_s if name
+
+      # Function element type shall be pointer to function type
+      element_type = Type::Pointer.new(element_type) if element_type.is_a?(Type::Function)
+      translate_typed_name(element_type, src)
+        .gsub(/\s+\[/, "[") # "a []" --> "a[]"
+    end
+
+    def translate_function_type(ty, name=nil)
+      params = ''.tap do |src|
+        src << '('
+        src << ty.params.map {|p| translate(p) }.join(', ')
+        src << ')'
+      end
+
+      return_type = ty.return_type
+      return_type = Type::Pointer.new(return_type) if return_type.is_a?(Type::Function)
+
+      ret_src = translate(return_type)
+
+      if return_type.is_a?(Type::Pointer) && return_type.termination_type.is_a?(Type::Function)
+        ret_src.gsub(/\*(.*?)\)/) do
+          "*#{$1}#{name}#{params})"
+        end
+      else
+        ret_src << ' ' unless pointer_asterisk?(return_type)
+        if name
+          ret_src << name.to_s
+        else
+          ret_src << '(*)'
+        end
+        ret_src << params
       end
     end
 
@@ -329,6 +386,15 @@ module Chelsy
         "(#{expr})"
       else
         expr
+      end
+    end
+
+    def pointer_asterisk?(ty)
+      case ty
+      when Type::Pointer
+        !ty.qualified?
+      else
+        false
       end
     end
 

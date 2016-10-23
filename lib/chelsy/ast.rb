@@ -120,6 +120,56 @@ module Chelsy
       end
     end
 
+  end
+
+  module Syntax
+    Type = Any.new('TypeSpecifier', [Chelsy::Type::Base, :void])
+  end
+
+  # Function and prototype params
+  class Param < Element
+    attr_reader :name, :type
+
+    def initialize(name, type, register: false, **rest)
+      @name = Syntax::Ident.ensure(name)
+      @type = Syntax::Type.ensure(type)
+
+      super(**rest)
+    end
+  end
+
+  module Syntax
+    Param = Any.new('Parameter', [Param, :void, :"..."])
+    ProtoParam = Any.new('Prototype Parameter', [Chelsy::Param, Symbol, Chelsy::Type::Base, :"..."])
+  end
+
+  class ParamList < Element
+    include NodeList
+
+    def initialize(**rest)
+      @params = []
+      super(**rest)
+    end
+
+    private
+    def items; @params end
+    def validate_node(node); Syntax::Param.ensure(node) end
+  end
+
+  class ProtoParamList < Element
+    include NodeList
+
+    def initialize(**rest)
+      @params = []
+      super(**rest)
+    end
+
+    private
+    def items; @params end
+    def validate_node(node); Syntax::ProtoParam.ensure(node) end
+  end
+
+  module Type
     class Numeric < Base
     end
 
@@ -197,6 +247,14 @@ module Chelsy
       def qualified?
         @restrict || super
       end
+
+      def termination_type
+        pointee = self.pointee
+        while pointee.is_a?(Type::Pointer)
+          pointee = pointee.pointee
+        end
+        pointee
+      end
     end
 
     # From: 6.7.5.3 Function declarators (including prototypes)
@@ -231,13 +289,22 @@ module Chelsy
       def static?; @static end
     end
 
-    # TODO Function
+    class Function < Derived
+      attr_reader :return_type, :params
+
+      def initialize(return_type, params, **rest)
+        @return_type = Syntax::Type.ensure(return_type)
+
+        @params = ProtoParamList.new.tap do |list|
+          params.map {|p| list << p }
+        end
+
+        super(**rest)
+      end
+    end
+
     # TODO Struct
     # TODO Union
-  end
-
-  module Syntax
-    Type = Any.new('TypeSpecifier', [Chelsy::Type::Base, :void])
   end
 
   # 6.4.4.1 Integer constants
@@ -528,39 +595,6 @@ module Chelsy
   # = 6.9 External definitions
 
   # == 6.9.1 Function definition
-
-  # Param-List ::
-  #     [] |
-  #     [:void] |
-  #     [Param] |
-  #     [Param, ..., :"..."]
-  class Param < Element
-    attr_reader :name, :type
-
-    def initialize(name, type, register: false, **rest)
-      @name = Syntax::Ident.ensure(name)
-      @type = Syntax::Type.ensure(type)
-
-      super(**rest)
-    end
-  end
-
-  module Syntax
-    Param = Any.new('Parameter', [Param, :void, :"..."])
-  end
-
-  class ParamList < Element
-    include NodeList
-
-    def initialize(**rest)
-      @params = []
-      super(**rest)
-    end
-
-    private
-    def items; @params end
-    def validate_node(node); Syntax::Param.ensure(node) end
-  end
 
   class Function < Declarative
     attr_reader :name, :return_type, :params, :body
