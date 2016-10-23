@@ -84,7 +84,7 @@ module Chelsy
       when Function
         translate_function(node)
       when Param
-        translate_function_param(node)
+        translate_param(node)
 
       else
         raise ArgumentError, "Unrecognized AST element: #{node.inspect}"
@@ -179,8 +179,7 @@ module Chelsy
 
       src.insert 0, name.to_s if name
 
-      # Function element type shall be pointer to function type
-      element_type = Type::Pointer.new(element_type) if element_type.is_a?(Type::Function)
+      element_type = coerce_func_ptr(element_type)
       translate_typed_name(element_type, src)
         .gsub(/\s+\[/, "[") # "a []" --> "a[]"
     end
@@ -188,12 +187,12 @@ module Chelsy
     def translate_function_type(ty, name=nil)
       params = ''.tap do |src|
         src << '('
-        src << ty.params.map {|p| translate(p) }.join(', ')
+        src << ty.params.map {|p| translate(coerce_func_ptr(p)) }.join(', ')
         src << ')'
       end
 
       return_type = ty.return_type
-      return_type = Type::Pointer.new(return_type) if return_type.is_a?(Type::Function)
+      return_type = coerce_func_ptr(return_type)
 
       ret_src = translate(return_type)
 
@@ -359,8 +358,9 @@ module Chelsy
       .strip
     end
 
-    def translate_function_param(node)
-      translate_typed_name(node.type, node.name)
+    def translate_param(node)
+      ty = coerce_func_ptr(node.type)
+      translate_typed_name(ty, node.name)
     end
 
     # = Directives
@@ -395,6 +395,16 @@ module Chelsy
         !ty.qualified?
       else
         false
+      end
+    end
+
+    # In some situation, function type shall be pointer to function type
+    def coerce_func_ptr(node)
+      case node
+      when Type::Function
+        Type::Pointer.new(node)
+      else
+        node
       end
     end
 

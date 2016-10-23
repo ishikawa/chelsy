@@ -221,20 +221,20 @@ PROG
     assert_equal 'int (*pfi)();', translator.translate(d)
 
     f = Type::Function.new(Type::Int.new, [
-          Param.new(:x, Type::Int.new),
-          Param.new(:y, Type::Int.new),
-        ])
+        Param.new(:x, Type::Int.new),
+        Param.new(:y, Type::Int.new),
+      ])
     d = Declaration.new(:apfi, Type::Array.new(f, Constant::Int.new(3)))
     assert_equal 'int (*apfi[3])(int x, int y);', translator.translate(d)
 
     f = Type::Function.new(Type::Int.new, [
-          Type::Int.new(),
-          :"...",
-        ])
+        Type::Int.new(),
+        :"...",
+      ])
     f = Type::Function.new(Type::Pointer.new(f), [
-          Type::Function.new(Type::Int.new, [Type::Long.new]),
-          Type::Int.new,
-        ])
+        Type::Function.new(Type::Int.new, [Type::Long.new]),
+        Type::Int.new,
+      ])
     d = Declaration.new(:fpfi, f)
     assert_equal 'int (*fpfi(int (*)(long), int))(int, ...);', translator.translate(d)
 
@@ -243,6 +243,13 @@ PROG
     f = Type::Function.new(fp, [Type::Int.new])
     d = Declaration.new(:fpp, f)
     assert_equal 'int (**fpp(int))(void);', translator.translate(d)
+
+    # atexit
+    f = Type::Function.new(Type::Int.new, [
+        Param.new(:func, Type::Function.new(:void, [:void])),
+      ])
+    d = Declaration.new(:atexit, f)
+    assert_equal 'int atexit(void (*func)(void));', translator.translate(d)
   end
 
   # = Function definition
