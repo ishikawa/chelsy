@@ -97,30 +97,6 @@ PROG
     assert_equal 'int **', translator.translate(ty)
     ty = Type::Pointer.new(Type::Pointer.new(Type::Int.new, const: true))
     assert_equal 'int *const *', translator.translate(ty)
-
-    # Function pointers
-    ty = Type::Function.new(Type::Int.new, [:void])
-    assert_equal 'int (*)(void)', translator.translate(ty)
-  end
-
-  def test_array_type
-    ty = Type::Array.new(Type::Int.new)
-    assert_equal 'int[]', translator.translate(ty)
-
-    # variable length array type of unspecified size
-    ty = Type::Array.new(Type::Int.new, :*)
-    assert_equal 'int[*]', translator.translate(ty)
-
-    ty = Type::Array.new(Type::Int.new, Constant::Int.new(5))
-    assert_equal 'int[5]', translator.translate(ty)
-
-    # `static` in parameter array declarator
-    ty = Type::Array.new(Type::Int.new, Constant::Int.new(5), static: true)
-    assert_equal 'int[static 5]', translator.translate(ty)
-
-    # type qualifiers in parameter array declarator
-    ty = Type::Array.new(Type::Int.new, Constant::Int.new(5), const: true, static: true)
-    assert_equal 'int[const static 5]', translator.translate(ty)
   end
 
   # = Expressions
@@ -212,6 +188,31 @@ PROG
     assert_equal 'typedef const unsigned int cui;', translator.translate(t)
   end
 
+  def test_array_type_declaration
+    ty = Type::Array.new(Type::Int.new)
+    d = Declaration.new(:x, ty)
+    assert_equal 'int x[];', translator.translate(d)
+
+    # variable length array type of unspecified size
+    ty = Type::Array.new(Type::Int.new, :*)
+    d = Declaration.new(:x, ty)
+    assert_equal 'int x[*];', translator.translate(d)
+
+    ty = Type::Array.new(Type::Int.new, Constant::Int.new(5))
+    d = Declaration.new(:x, ty)
+    assert_equal 'int x[5];', translator.translate(d)
+
+    # `static` in parameter array declarator
+    ty = Type::Array.new(Type::Int.new, Constant::Int.new(5), static: true)
+    d = Declaration.new(:x, ty)
+    assert_equal 'int x[static 5];', translator.translate(d)
+
+    # type qualifiers in parameter array declarator
+    ty = Type::Array.new(Type::Int.new, Constant::Int.new(5), const: true, static: true)
+    d = Declaration.new(:x, ty)
+    assert_equal 'int x[const static 5];', translator.translate(d)
+  end
+
   def test_function_declaration
     d = Declaration.new(:f, Type::Function.new(Type::Int.new, [:void]))
     assert_equal 'int f(void);', translator.translate(d)
@@ -219,6 +220,12 @@ PROG
     assert_equal 'int *f(void);', translator.translate(d)
     d = Declaration.new(:pfi, Type::Pointer.new(Type::Function.new(Type::Int.new, [])))
     assert_equal 'int (*pfi)();', translator.translate(d)
+
+    # Function pointers
+    ty = Type::Function.new(Type::Int.new, [:void])
+    f = Type::Function.new(:void, [ty])
+    d = Declaration.new(:f, f)
+    assert_equal 'void f(int (*)(void));', translator.translate(d)
 
     f = Type::Function.new(Type::Int.new, [
         Param.new(:x, Type::Int.new),
@@ -250,6 +257,13 @@ PROG
       ])
     d = Declaration.new(:atexit, f)
     assert_equal 'int atexit(void (*func)(void));', translator.translate(d)
+
+    # x is function returning pointer to array[] of pointer to function returning char
+    a = Type::Function.new(Type::Char.new, [])
+    a = Type::Array.new(Type::Pointer.new(a))
+    f = Type::Function.new(Type::Pointer.new(a), [])
+    d = Declaration.new(:x, f)
+    assert_equal 'char (*(*x())[])();', translator.translate(d)
   end
 
   # = Function definition

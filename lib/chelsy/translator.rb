@@ -135,95 +135,64 @@ module Chelsy
     end
 
     def translate_pointer_type(ty, name=nil)
-      pointee = ty
-      src = ''
-
-      while pointee.is_a?(Type::Pointer)
-        qualifier = '*'
-        qualifier << 'const '    if pointee.const?
-        qualifier << 'volatile ' if pointee.volatile?
-        qualifier << 'restrict ' if pointee.restrict?
-
-        pointee = pointee.pointee
-        src.insert 0, qualifier
+      # qualifiers
+      src = ''.tap do |qualifier|
+        qualifier << '*'
+        qualifier << 'const '    if ty.const?
+        qualifier << 'volatile ' if ty.volatile?
+        qualifier << 'restrict ' if ty.restrict?
       end
 
-      src.strip!
-      src << name.to_s if name
+      # name
+      src << name.to_s
 
-      case pointee
-      when Type::Function
-        translate_function_type(pointee, "(#{src})")
-      when Type::Array
-        translate_array_type(pointee, "(#{src})")
+      # parenthesize if needed
+      case ty.pointee
+      when Type::Function, Type::Array
+        translate_typed_name(ty.pointee, "(#{src})")
       else
-        translate_typed_name(pointee, src)
+        translate_typed_name(ty.pointee, src)
       end
     end
 
     def translate_array_type(ty, name=nil)
-      element_type = ty
-      src = ''
-
-      while element_type.is_a?(Type::Array)
-        subscription = '['
-        subscription << 'const ' if element_type.const?
-        subscription << 'volatile ' if element_type.volatile?
-        subscription << 'static ' if element_type.static?
-        subscription << translate(element_type.size) if element_type.size
-        subscription << ']'
-
-        element_type = element_type.element_type
-        src.insert 0, subscription
+      src = name.to_s.tap do |subscript|
+        subscript << '['
+        subscript << 'const ' if ty.const?
+        subscript << 'volatile ' if ty.volatile?
+        subscript << 'static ' if ty.static?
+        subscript << translate(ty.size) if ty.size
+        subscript << ']'
       end
 
-      src.insert 0, name.to_s if name
-
-      element_type = coerce_func_ptr(element_type)
-      translate_typed_name(element_type, src)
-        .gsub(/\s+\[/, "[") # "a []" --> "a[]"
+      translate_typed_name(coerce_func_ptr(ty.element_type), src)
     end
 
     def translate_function_type(ty, name=nil)
-      params = ''.tap do |src|
-        src << '('
-        src << ty.params.map {|p| translate(coerce_func_ptr(p)) }.join(', ')
-        src << ')'
+      src = name.to_s.tap do |params|
+        params << '('
+        params << ty.params.map {|p| translate(coerce_func_ptr(p)) }.join(', ')
+        params << ')'
       end
 
-      return_type = ty.return_type
-      return_type = coerce_func_ptr(return_type)
-
-      ret_src = translate(return_type)
-
-      if return_type.is_a?(Type::Pointer) && return_type.termination_type.is_a?(Type::Function)
-        ret_src.gsub(/\*(.*?)\)/) do
-          "*#{$1}#{name}#{params})"
-        end
-      else
-        ret_src << ' ' unless pointer_asterisk?(return_type)
-        if name
-          ret_src << name.to_s
-        else
-          ret_src << '(*)'
-        end
-        ret_src << params
-      end
+      translate_typed_name(coerce_func_ptr(ty.return_type), src)
     end
 
     def translate_primitive_type(ty, name=nil)
+      src = case ty
+            when :void; 'void'
+            when Type::Char; 'char'
+            when Type::Short; 'short'
+            when Type::Integral
+              translate_integral_type(ty)
+            end
       case ty
-      when :void; 'void'
-      when Type::Char; 'char'
-      when Type::Short; 'short'
-      when Type::Integral
-        translate_integral_type(ty)
-      end.tap do |src|
-        # qualifiers
+      when Type::Base;
         src.insert(0, 'const ') if ty.const?
         src.insert(0, 'volatile ') if ty.volatile?
       end
-      .tap do |src|
+
+      src.tap do |src|
         src << " #{name}" if name
       end
     end
