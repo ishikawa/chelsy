@@ -124,6 +124,8 @@ module Chelsy
         translate_array_type(ty, name)
       when Type::Function
         translate_function_type(ty, name)
+      when Type::Struct
+        translate_struct_type(ty, name)
       when Type::Derived
         raise NotImplementedError
       else
@@ -176,6 +178,25 @@ module Chelsy
       end
 
       translate_typed_name(coerce_func_ptr(ty.return_type), src)
+    end
+
+    def translate_struct_type(ty, name=nil)
+      src = [].tap do |buffer|
+        buffer << 'const ' if ty.const?
+        buffer << 'volatile ' if ty.volatile?
+        buffer << 'struct'
+        buffer << ty.tag if ty.tag
+        buffer << name if name
+      end
+      .join(' ')
+
+      if ty.members
+        src << ' { '
+        src << ty.members.map {|m| translate(m) }.join(' ')
+        src << ' }'
+      end
+
+      src
     end
 
     def translate_primitive_type(ty, name=nil)

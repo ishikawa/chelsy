@@ -99,6 +99,15 @@ PROG
     assert_equal 'int *const *', translator.translate(ty)
   end
 
+  def test_struct_types
+    ty = Type::Struct.new(:tnode)
+    assert_equal 'struct tnode', translator.translate(ty)
+    ty = Type::Struct.new(:s, [
+        Declaration.new(:n, Type::Int.new)
+      ])
+    assert_equal 'struct s { int n; }', translator.translate(ty)
+  end
+
   # = Expressions
 
   def test_array_subscption

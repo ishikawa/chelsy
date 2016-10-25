@@ -276,7 +276,7 @@ module Chelsy
 
       def initialize(element_type, size = nil, static: false, **rest)
         @element_type = element_type
-        @size = size
+        @size = size && Syntax::ArraySize.ensure(size)
         @static = !!static
 
         super(**rest)
@@ -303,8 +303,63 @@ module Chelsy
       end
     end
 
-    # TODO Struct
+    # Struct, Unicon, Enum
+
+    class Taggable < Derived
+      attr_reader :tag
+
+      def initialize(tag, **rest)
+        @tag = tag.to_sym
+        super **rest
+      end
+    end
+
+    # Struct or Union member with bit-field
+    #
+    # Unnamed bit-field ::
+    #     A bit-field declaration with no declarator, but only a colon and a width
+    class BitFieldMember < Node
+      attr_reader :declaration, :bits
+
+      def initialize(bits, declaration=nil)
+        @declaration = Syntax::Declaration.ensure(declaration)
+        @bits = bits && Syntax::BitField.ensure(bits)
+
+        super **rest
+      end
+    end
+
+    class StructOrUnionMemberList < Node
+      include NodeList
+
+      def initialize(**rest)
+        @members = []
+        super(**rest)
+      end
+
+      private
+      def items; @members end
+      def validate_node(node); Syntax::StructOrUnionMember.ensure(node) end
+    end
+
+    class Struct < Taggable
+      attr_reader :members
+
+      def initialize(tag, members=nil, **rest)
+        if members
+          @members = StructOrUnionMemberList.new.tap do |list|
+            members.each {|m| list << m }
+          end
+        else
+          @members = nil
+        end
+
+        super tag, **rest
+      end
+    end
+
     # TODO Union
+    # TODO Enum
   end
 
   # 6.4.4.1 Integer constants
@@ -337,6 +392,11 @@ module Chelsy
     class LongLong < Integral
     end
 
+  end
+
+  module Syntax
+    ArraySize = Any.new('ArraySize', [Chelsy::Expr, Symbol])
+    BitField = Any.new('BitField', [Chelsy::Constant::Integral])
   end
 
   # 6.4.5 String literals
@@ -532,9 +592,6 @@ module Chelsy
   end
 
   # == 6.8.2 Compound statement
-  module Syntax
-    BlockItem = Any.new('BlockItem', [Stmt, Declarative])
-  end
 
   class Block < Stmt
     include NodeList
@@ -590,6 +647,12 @@ module Chelsy
       rest[:storage] = :typedef
       super(**rest)
     end
+  end
+
+  module Syntax
+    BlockItem = Any.new('BlockItem', [Stmt, Chelsy::Declarative])
+    Declaration = Any.new('Declaration', [Chelsy::Declaration])
+    StructOrUnionMember = Any.new('StructOrUnionMember', [Chelsy::Declaration, Chelsy::Type::BitFieldMember])
   end
 
   # = 6.9 External definitions
