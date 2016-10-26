@@ -103,9 +103,14 @@ PROG
     ty = Type::Struct.new(:tnode)
     assert_equal 'struct tnode', translator.translate(ty)
     ty = Type::Struct.new(:s, [
-        Declaration.new(:n, Type::Int.new)
+        Declaration.new(:n, Type::Int.new),
       ])
     assert_equal 'struct s { int n; }', translator.translate(ty)
+    ty = Type::Struct.new(:s, [
+        Declaration.new(:n, Type::Int.new),
+        Declaration.new(:d, Type::Array.new(Type::Double.new)),
+      ])
+    assert_equal 'struct s { int n; double d[]; }', translator.translate(ty)
   end
 
   # = Expressions

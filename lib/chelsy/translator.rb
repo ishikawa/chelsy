@@ -202,10 +202,10 @@ module Chelsy
     def translate_primitive_type(ty, name=nil)
       src = case ty
             when :void; 'void'
-            when Type::Char; 'char'
-            when Type::Short; 'short'
             when Type::Integral
               translate_integral_type(ty)
+            else
+              translate_numeric_type(ty)
             end
       case ty
       when Type::Base;
@@ -227,6 +227,21 @@ module Chelsy
       when Type::LongLong; 'long long'
       end.tap do |src|
         src.insert(0, 'unsigned ') if ty.unsigned?
+      end
+    end
+
+    def translate_numeric_type(ty)
+      case ty
+      when Type::Bool;              '_Bool'
+      when Type::Float;             'float'
+      when Type::Double;            'double'
+      when Type::LongDouble;        'long double'
+      when Type::Complex;           '_Complex'
+      when Type::FloatComplex;      'float _Complex'
+      when Type::DoubleComplex;     'double _Complex'
+      when Type::LongDoubleComplex; 'long double _Complex'
+      else
+        raise NotImplementedError
       end
     end
 
