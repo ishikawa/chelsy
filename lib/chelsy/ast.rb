@@ -7,20 +7,25 @@ module Chelsy
     end
   end
 
-  # The class must provide a method `items` and `validate_node`
+  # The class must provide a method validate_node`
   module NodeList
     include Enumerable
 
+    def initialize(items=[], **rest)
+      @items = items.map {|element| validate_node(element) }
+      super(**rest)
+    end
+
     def each(&block)
-      items.each(&block)
+      @items.each(&block)
       self
     end
 
-    def size; items.size end
-    def empty?; items.empty? end
+    def size; @items.size end
+    def empty?; @items.empty? end
 
     def <<(node)
-      items << validate_node(node)
+      @items << validate_node(node)
       self
     end
   end
@@ -38,13 +43,7 @@ module Chelsy
   class FragmentList < Node
     include NodeList
 
-    def initialize(**rest)
-      @fragments = []
-      super(**rest)
-    end
-
     private
-    def items; @fragments end
     def validate_node(node); Syntax::Fragment.ensure(node) end
   end
 
@@ -92,13 +91,7 @@ module Chelsy
   class Document < Element
     include NodeList
 
-    def initialize(**rest)
-      @items = []
-      super(**rest)
-    end
-
     private
-    def items; @items end
     def validate_node(node); Syntax::TopLevel.ensure(node) end
   end
 
@@ -146,26 +139,14 @@ module Chelsy
   class ParamList < Element
     include NodeList
 
-    def initialize(**rest)
-      @params = []
-      super(**rest)
-    end
-
     private
-    def items; @params end
     def validate_node(node); Syntax::Param.ensure(node) end
   end
 
   class ProtoParamList < Element
     include NodeList
 
-    def initialize(**rest)
-      @params = []
-      super(**rest)
-    end
-
     private
-    def items; @params end
     def validate_node(node); Syntax::ProtoParam.ensure(node) end
   end
 
@@ -294,10 +275,7 @@ module Chelsy
 
       def initialize(return_type, params, **rest)
         @return_type = Syntax::Type.ensure(return_type)
-
-        @params = ProtoParamList.new.tap do |list|
-          params.map {|p| list << p }
-        end
+        @params = ProtoParamList.new(params)
 
         super(**rest)
       end
@@ -332,13 +310,7 @@ module Chelsy
     class StructOrUnionMemberList < Node
       include NodeList
 
-      def initialize(**rest)
-        @members = []
-        super(**rest)
-      end
-
       private
-      def items; @members end
       def validate_node(node); Syntax::StructOrUnionMember.ensure(node) end
     end
 
@@ -346,13 +318,7 @@ module Chelsy
       attr_reader :members
 
       def initialize(tag, members=nil, **rest)
-        if members
-          @members = StructOrUnionMemberList.new.tap do |list|
-            members.each {|m| list << m }
-          end
-        else
-          @members = nil
-        end
+        @members = StructOrUnionMemberList.new(members) if members
 
         super tag, **rest
       end
@@ -596,13 +562,7 @@ module Chelsy
   class Block < Stmt
     include NodeList
 
-    def initialize(**rest)
-      @items = []
-      super(**rest)
-    end
-
     private
-    def items; @items end
 
     # Implicit convertion from Expr to ExprStmt
     def validate_node(node)
@@ -665,10 +625,7 @@ module Chelsy
     def initialize(name, return_type, params, inline: false, **rest, &block)
       @name = Syntax::Ident.ensure(name)
       @return_type = Syntax::Type.ensure(return_type)
-
-      @params = ParamList.new.tap do |list|
-        params.map {|p| list << p }
-      end
+      @params = ParamList.new(params)
 
       @body = Block.new
       block.call(@body)

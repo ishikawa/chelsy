@@ -14,6 +14,13 @@ class Chelsy::ASTTest < Minitest::Test
     assert ExprStmt === f.body.first
   end
 
+  def test_struct
+    s = Type::Struct.new(:s)
+
+    assert_equal :s, s.tag
+    assert_nil s.members
+  end
+
   def test_return
     ret = Return.new
     assert_nil ret.expr
