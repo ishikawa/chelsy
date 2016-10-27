@@ -316,27 +316,27 @@ module Chelsy
     # = Statements
 
     def translate_empty_stmt(node)
-      indent << ';'
+      ';'
     end
 
     def translate_expr_stmt(node)
-      indent << translate(node.expr) << ';'
+      translate(node.expr) << ';'
     end
 
     def translate_return(node)
       if node.expr
-        indent << 'return ' << translate(node.expr) << ';'
+        'return ' << translate(node.expr) << ';'
       else
-        indent << 'return;'
+        'return;'
       end
     end
 
     def translate_block(node)
       @indent_level += 1
-      body = node.map {|item| translate(item) }.join("\n")
+      body = node.map {|item| indent << translate(item) }.join("\n")
       @indent_level -= 1
 
-      "#{indent}{\n#{body}\n#{indent}}"
+      "{\n#{body}\n#{indent}}"
     end
 
     # = Declaration

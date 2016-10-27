@@ -10,11 +10,16 @@ class Chelsy::TranslatorTest < Minitest::Test
   end
 
   def test_indent
+    b = Block.new << EmptyStmt.new
+
     translator.indent_string = ' '
     translator.indent_level = 1
-    assert_equal ' ;', translator.translate(EmptyStmt.new)
+    assert_equal <<PROG, translator.translate(b) + "\n"
+{
+  ;
+ }
+PROG
 
-    # blocks
     b = Block.new << (Block.new << :x)
 
     translator.indent_string = "  "
