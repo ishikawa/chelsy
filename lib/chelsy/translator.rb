@@ -313,18 +313,18 @@ module Chelsy
     # = Statements
 
     def translate_empty_stmt(node)
-      ';'
+      ''
     end
 
     def translate_expr_stmt(node)
-      translate(node.expr) << ';'
+      translate(node.expr)
     end
 
     def translate_return(node)
       if node.expr
-        'return ' << translate(node.expr) << ';'
+        'return ' << translate(node.expr)
       else
-        'return;'
+        'return'
       end
     end
 
@@ -339,7 +339,7 @@ module Chelsy
         translate_typed_name(node.type, node.name),
       ]
       .join(' ')
-      .strip << ';'
+      .strip
     end
 
     # = Function
@@ -389,7 +389,22 @@ module Chelsy
 
     def translate_stmts_with_indent(node)
       @indent_level += 1
-      body = node.map {|item| indent << translate(item) }.join("\n")
+
+      lines = node.map do |item|
+        indent.tap do |src|
+          src << translate(item)
+
+          # terminate ';' if needed
+          case item
+          when Block
+            src
+          else
+            src << ';'
+          end
+        end
+      end
+
+      body = lines.join("\n")
       @indent_level -= 1
 
       "{\n#{body}\n#{indent}}"
