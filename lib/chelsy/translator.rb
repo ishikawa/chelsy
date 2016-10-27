@@ -181,7 +181,7 @@ module Chelsy
     end
 
     def translate_struct_type(ty, name=nil)
-      src = [].tap do |buffer|
+      [].tap do |buffer|
         buffer << 'const ' if ty.const?
         buffer << 'volatile ' if ty.volatile?
         buffer << 'struct'
@@ -189,14 +189,11 @@ module Chelsy
         buffer << name if name
       end
       .join(' ')
-
-      if ty.members
-        src << ' { '
-        src << ty.members.map {|m| translate(m) }.join(' ')
-        src << ' }'
+      .tap do |src|
+        if ty.members
+          src << ' ' << translate_stmts_with_indent(ty.members)
+        end
       end
-
-      src
     end
 
     def translate_primitive_type(ty, name=nil)
@@ -332,11 +329,7 @@ module Chelsy
     end
 
     def translate_block(node)
-      @indent_level += 1
-      body = node.map {|item| indent << translate(item) }.join("\n")
-      @indent_level -= 1
-
-      "{\n#{body}\n#{indent}}"
+      translate_stmts_with_indent(node)
     end
 
     # = Declaration
@@ -394,13 +387,12 @@ module Chelsy
       end
     end
 
-    def pointer_asterisk?(ty)
-      case ty
-      when Type::Pointer
-        !ty.qualified?
-      else
-        false
-      end
+    def translate_stmts_with_indent(node)
+      @indent_level += 1
+      body = node.map {|item| indent << translate(item) }.join("\n")
+      @indent_level -= 1
+
+      "{\n#{body}\n#{indent}}"
     end
 
     # In some situation, function type shall be pointer to function type
@@ -442,6 +434,7 @@ module Chelsy
         suffix
       end
     end
+
   end
 
 end
