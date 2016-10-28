@@ -296,11 +296,11 @@ module Chelsy
     #
     # Unnamed bit-field ::
     #     A bit-field declaration with no declarator, but only a colon and a width
-    class BitFieldMember < Node
+    class BitField < Element
       attr_reader :declaration, :bits
 
-      def initialize(bits, declaration=nil)
-        @declaration = Syntax::Declaration.ensure(declaration)
+      def initialize(bits, declaration=nil, **rest)
+        @declaration = Syntax::Declaration.ensure(declaration) if declaration
         @bits = bits && Syntax::BitField.ensure(bits)
 
         super **rest
@@ -612,7 +612,7 @@ module Chelsy
   module Syntax
     BlockItem = Any.new('BlockItem', [Stmt, Chelsy::Declarative])
     Declaration = Any.new('Declaration', [Chelsy::Declaration])
-    StructOrUnionMember = Any.new('StructOrUnionMember', [Chelsy::Declaration, Chelsy::Type::BitFieldMember])
+    StructOrUnionMember = Any.new('StructOrUnionMember', [Chelsy::Declaration, Chelsy::Type::BitField])
   end
 
   # = 6.9 External definitions

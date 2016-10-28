@@ -81,11 +81,12 @@ module Chelsy
       # Definition
       when Declaration, Typedef
         translate_declaration(node)
+      when Type::BitField
+        translate_bit_field(node)
       when Function
         translate_function(node)
       when Param
         translate_param(node)
-
       else
         raise ArgumentError, "Unrecognized AST element: #{node.inspect}"
       end
@@ -340,6 +341,14 @@ module Chelsy
       ]
       .join(' ')
       .strip
+    end
+
+    def translate_bit_field(node)
+      if node.declaration
+        "#{translate node.declaration} : #{translate node.bits}"
+      else
+        ": #{translate node.bits}"
+      end
     end
 
     # = Function

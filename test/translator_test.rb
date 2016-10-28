@@ -127,6 +127,25 @@ struct s {
     double d[];
 }
 PROG
+
+    # bit-field
+    ty = Type::Struct.new(:s, [
+        Type::BitField.new(
+          Constant::Int.new(3),
+          Declaration.new(:b1, Type::Char.new(unsigned: true))),
+        Type::BitField.new(
+          Constant::Int.new(2)),
+        Type::BitField.new(
+          Constant::Int.new(6),
+          Declaration.new(:b2, Type::Char.new(unsigned: true))),
+      ])
+    assert_equal <<PROG, translator.translate(ty) + "\n"
+struct s {
+    unsigned char b1 : 3;
+    : 2;
+    unsigned char b2 : 6;
+}
+PROG
   end
 
   # = Expressions
