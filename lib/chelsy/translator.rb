@@ -127,6 +127,8 @@ module Chelsy
         translate_function_type(ty, name)
       when Type::Struct
         translate_struct_type(ty, name)
+      when Type::Union
+        translate_union_type(ty, name)
       when Type::Derived
         raise NotImplementedError
       else
@@ -182,10 +184,21 @@ module Chelsy
     end
 
     def translate_struct_type(ty, name=nil)
+      translate_struct_or_union_type(ty, name)
+    end
+
+    def translate_union_type(ty, name=nil)
+      translate_struct_or_union_type(ty, name)
+    end
+
+    def translate_struct_or_union_type(ty, name=nil)
       [].tap do |buffer|
         buffer << 'const ' if ty.const?
         buffer << 'volatile ' if ty.volatile?
-        buffer << 'struct'
+        buffer << case ty
+                  when Type::Struct; 'struct'
+                  when Type::Union; 'union'
+                  end
         buffer << ty.tag if ty.tag
         buffer << name if name
       end

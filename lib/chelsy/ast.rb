@@ -314,18 +314,25 @@ module Chelsy
       def validate_node(node); Syntax::StructOrUnionMember.ensure(node) end
     end
 
-    class Struct < Taggable
+    module StructOrUnion
       attr_reader :members
 
       def initialize(tag, members=nil, **rest)
         @members = StructOrUnionMemberList.new(members) if members
-
         super tag, **rest
       end
     end
 
-    # TODO Union
+    class Struct < Taggable
+      include StructOrUnion
+    end
+
+    class Union < Taggable
+      include StructOrUnion
+    end
+
     # TODO Enum
+
   end
 
   # 6.4.4.1 Integer constants

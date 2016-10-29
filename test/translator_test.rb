@@ -148,6 +148,26 @@ struct s {
 PROG
   end
 
+  def test_union_types
+    ty = Type::Union.new(:U)
+    assert_equal 'union U', translator.translate(ty)
+
+    ty = Type::Union.new(:U, [
+        Declaration.new(:i, Type::Int.new),
+        Type::BitField.new(
+          Constant::Int.new(3),
+          Declaration.new(:c, Type::Char.new(unsigned: true))),
+        Declaration.new(:s, Type::Struct.new(:S)),
+      ])
+    assert_equal <<PROG, translator.translate(ty) + "\n"
+union U {
+    int i;
+    unsigned char c : 3;
+    struct S s;
+}
+PROG
+  end
+
   # = Expressions
 
   def test_array_subscption
