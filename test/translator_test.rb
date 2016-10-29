@@ -130,12 +130,12 @@ PROG
 
     # bit-field
     ty = Type::Struct.new(:s, [
-        Type::BitField.new(
+        BitField.new(
           Constant::Int.new(3),
           Declaration.new(:b1, Type::Char.new(unsigned: true))),
-        Type::BitField.new(
+        BitField.new(
           Constant::Int.new(2)),
-        Type::BitField.new(
+        BitField.new(
           Constant::Int.new(6),
           Declaration.new(:b2, Type::Char.new(unsigned: true))),
       ])
@@ -154,7 +154,7 @@ PROG
 
     ty = Type::Union.new(:U, [
         Declaration.new(:i, Type::Int.new),
-        Type::BitField.new(
+        BitField.new(
           Constant::Int.new(3),
           Declaration.new(:c, Type::Char.new(unsigned: true))),
         Declaration.new(:s, Type::Struct.new(:S)),
@@ -175,7 +175,7 @@ PROG
     ty = Type::Enum.new(:hue, [
       :chartreuse,
       :burgundy,
-      Type::EnumMember.new(:claret, Constant::Int.new(20)),
+      EnumMember.new(:claret, Constant::Int.new(20)),
       :winedark,
     ])
     assert_equal <<PROG, translator.translate(ty) + "\n"

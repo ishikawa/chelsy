@@ -81,7 +81,7 @@ module Chelsy
       # Definition
       when Declaration, Typedef
         translate_declaration(node)
-      when Type::BitField
+      when BitField
         translate_bit_field(node)
       when Function
         translate_function(node)
@@ -418,9 +418,9 @@ module Chelsy
 
     def translate_taggable_members(members)
       case members
-      when Type::StructOrUnionMemberList
+      when StructOrUnionMemberList
         translate_stmts_with_indent(members)
-      when Type::EnumMemberList
+      when EnumMemberList
         translate_enum_members(members)
       else
         raise "Unrecognized members: #{members.inspect}"
@@ -432,7 +432,7 @@ module Chelsy
 
       lines = members.map do |item|
         case item
-        when Type::EnumMember
+        when EnumMember
           if item.init
             "#{translate item.name} = #{translate item.init}"
           else

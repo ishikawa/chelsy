@@ -75,6 +75,45 @@ module Chelsy
     def static?; @storage == :static end
   end
 
+  # Struct or Union member with bit-field
+  #
+  # Unnamed bit-field ::
+  #     A bit-field declaration with no declarator, but only a colon and a width
+  class BitField < Element
+    attr_reader :declaration, :bits
+
+    def initialize(bits, declaration=nil, **rest)
+      @declaration = Syntax::Declaration.ensure(declaration) if declaration
+      @bits = bits && Syntax::BitField.ensure(bits)
+
+      super **rest
+    end
+  end
+
+  class EnumMember < Element
+    attr_reader :name, :init
+
+    def initialize(name, init=nil, **rest)
+      @name = name.to_sym
+      @init = init
+      super **rest
+    end
+  end
+
+  class StructOrUnionMemberList < Element
+    include NodeList
+
+    private
+    def validate_node(node); Syntax::StructOrUnionMember.ensure(node) end
+  end
+
+  class EnumMemberList < Element
+    include NodeList
+
+    private
+    def validate_node(node); Syntax::EnumMember.ensure(node) end
+  end
+
   class Expr < Element
   end
 
@@ -290,45 +329,6 @@ module Chelsy
         @tag = tag.to_sym
         super **rest
       end
-    end
-
-    # Struct or Union member with bit-field
-    #
-    # Unnamed bit-field ::
-    #     A bit-field declaration with no declarator, but only a colon and a width
-    class BitField < Element
-      attr_reader :declaration, :bits
-
-      def initialize(bits, declaration=nil, **rest)
-        @declaration = Syntax::Declaration.ensure(declaration) if declaration
-        @bits = bits && Syntax::BitField.ensure(bits)
-
-        super **rest
-      end
-    end
-
-    class EnumMember < Element
-      attr_reader :name, :init
-
-      def initialize(name, init=nil, **rest)
-        @name = name.to_sym
-        @init = init
-        super **rest
-      end
-    end
-
-    class StructOrUnionMemberList < Node
-      include NodeList
-
-      private
-      def validate_node(node); Syntax::StructOrUnionMember.ensure(node) end
-    end
-
-    class EnumMemberList < Node
-      include NodeList
-
-      private
-      def validate_node(node); Syntax::EnumMember.ensure(node) end
     end
 
     module StructOrUnion
@@ -643,8 +643,8 @@ module Chelsy
   module Syntax
     BlockItem = Any.new('BlockItem', [Stmt, Chelsy::Declarative])
     Declaration = Any.new('Declaration', [Chelsy::Declaration])
-    StructOrUnionMember = Any.new('StructOrUnionMember', [Chelsy::Declaration, Chelsy::Type::BitField])
-    EnumMember = Any.new('EnumMember', [Chelsy::Type::EnumMember, Symbol])
+    StructOrUnionMember = Any.new('StructOrUnionMember', [Chelsy::Declaration, Chelsy::BitField])
+    EnumMember = Any.new('EnumMember', [Chelsy::EnumMember, Symbol])
   end
 
   # = 6.9 External definitions
