@@ -307,11 +307,28 @@ module Chelsy
       end
     end
 
+    class EnumMember < Element
+      attr_reader :name, :init
+
+      def initialize(name, init=nil, **rest)
+        @name = name.to_sym
+        @init = init
+        super **rest
+      end
+    end
+
     class StructOrUnionMemberList < Node
       include NodeList
 
       private
       def validate_node(node); Syntax::StructOrUnionMember.ensure(node) end
+    end
+
+    class EnumMemberList < Node
+      include NodeList
+
+      private
+      def validate_node(node); Syntax::EnumMember.ensure(node) end
     end
 
     module StructOrUnion
@@ -331,7 +348,14 @@ module Chelsy
       include StructOrUnion
     end
 
-    # TODO Enum
+    class Enum < Taggable
+      attr_reader :members
+
+      def initialize(tag, members=nil, **rest)
+        @members = EnumMemberList.new(members) if members
+        super tag, **rest
+      end
+    end
 
   end
 
@@ -620,6 +644,7 @@ module Chelsy
     BlockItem = Any.new('BlockItem', [Stmt, Chelsy::Declarative])
     Declaration = Any.new('Declaration', [Chelsy::Declaration])
     StructOrUnionMember = Any.new('StructOrUnionMember', [Chelsy::Declaration, Chelsy::Type::BitField])
+    EnumMember = Any.new('EnumMember', [Chelsy::Type::EnumMember, Symbol])
   end
 
   # = 6.9 External definitions

@@ -129,6 +129,8 @@ module Chelsy
         translate_struct_type(ty, name)
       when Type::Union
         translate_union_type(ty, name)
+      when Type::Enum
+        translate_enum_type(ty, name)
       when Type::Derived
         raise NotImplementedError
       else
@@ -184,30 +186,15 @@ module Chelsy
     end
 
     def translate_struct_type(ty, name=nil)
-      translate_struct_or_union_type(ty, name)
+      translate_taggable_type_members(ty, name)
     end
 
     def translate_union_type(ty, name=nil)
-      translate_struct_or_union_type(ty, name)
+      translate_taggable_type_members(ty, name)
     end
 
-    def translate_struct_or_union_type(ty, name=nil)
-      [].tap do |buffer|
-        buffer << 'const ' if ty.const?
-        buffer << 'volatile ' if ty.volatile?
-        buffer << case ty
-                  when Type::Struct; 'struct'
-                  when Type::Union; 'union'
-                  end
-        buffer << ty.tag if ty.tag
-        buffer << name if name
-      end
-      .join(' ')
-      .tap do |src|
-        if ty.members
-          src << ' ' << translate_stmts_with_indent(ty.members)
-        end
-      end
+    def translate_enum_type(ty, name=nil)
+      translate_taggable_type_members(ty, name)
     end
 
     def translate_primitive_type(ty, name=nil)
@@ -407,6 +394,61 @@ module Chelsy
       else
         expr
       end
+    end
+
+    def translate_taggable_type_members(ty, name=nil)
+      [].tap do |buffer|
+        buffer << 'const ' if ty.const?
+        buffer << 'volatile ' if ty.volatile?
+        buffer << case ty
+                  when Type::Struct; 'struct'
+                  when Type::Union;  'union'
+                  when Type::Enum;   'enum'
+                  end
+        buffer << ty.tag if ty.tag
+        buffer << name if name
+      end
+      .join(' ')
+      .tap do |src|
+        if ty.members
+          src << ' ' << translate_taggable_members(ty.members)
+        end
+      end
+    end
+
+    def translate_taggable_members(members)
+      case members
+      when Type::StructOrUnionMemberList
+        translate_stmts_with_indent(members)
+      when Type::EnumMemberList
+        translate_enum_members(members)
+      else
+        raise "Unrecognized members: #{members.inspect}"
+      end
+    end
+
+    def translate_enum_members(members)
+      @indent_level += 1
+
+      lines = members.map do |item|
+        case item
+        when Type::EnumMember
+          if item.init
+            "#{translate item.name} = #{translate item.init}"
+          else
+            "#{translate item.name}"
+          end
+        when Symbol
+          "#{translate item}"
+        else
+          raise "Unrecognized enum member: #{item.inspect}"
+        end
+      end
+
+      body = lines.map {|line| indent << line }.join(",\n")
+      @indent_level -= 1
+
+      "{\n#{body}\n#{indent}}"
     end
 
     def translate_stmts_with_indent(node)

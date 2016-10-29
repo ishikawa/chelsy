@@ -168,6 +168,26 @@ union U {
 PROG
   end
 
+  def test_enum_types
+    ty = Type::Enum.new(:E)
+    assert_equal 'enum E', translator.translate(ty)
+
+    ty = Type::Enum.new(:hue, [
+      :chartreuse,
+      :burgundy,
+      Type::EnumMember.new(:claret, Constant::Int.new(20)),
+      :winedark,
+    ])
+    assert_equal <<PROG, translator.translate(ty) + "\n"
+enum hue {
+    chartreuse,
+    burgundy,
+    claret = 20,
+    winedark
+}
+PROG
+  end
+
   # = Expressions
 
   def test_array_subscption
