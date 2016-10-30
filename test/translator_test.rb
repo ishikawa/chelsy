@@ -265,6 +265,29 @@ PROG
 
   # = Declaration
 
+  def test_initializer
+    d = Declaration.new(:a, Type::Int.new, Constant::Int.new(3))
+    assert_equal 'int a = 3', translator.translate(d)
+
+    d = Declaration.new(:m, Type::Array.new(Type::Int.new), [
+        Constant::Int.new(1),
+        Constant::Int.new(2),
+        Constant::Int.new(3),
+      ])
+    assert_equal 'int m[] = { 1, 2, 3 }', translator.translate(d)
+
+    d = Declaration.new(:m, Type::Array.new(Type::Int.new), [
+        Initializer.new(Constant::Int.new(1)),
+        Initializer.new(Constant::Int.new(2), IndexDesignator.new(:member_two))
+      ])
+    assert_equal 'int m[] = { 1, [member_two] = 2 }', translator.translate(d)
+
+    d = Declaration.new(:w, Type::Struct.new(:s), [
+        Initializer.new(Constant::Int.new(1), MemberDesignator.new(:a))
+      ])
+    assert_equal 'struct s w = { .a = 1 }', translator.translate(d)
+  end
+
   def test_declaration
     d = Declaration.new(:a, Type::Int.new)
     assert_equal 'int a', translator.translate(d)

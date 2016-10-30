@@ -34,10 +34,6 @@ module Chelsy
   end
 
   module Syntax
-    Fragment = Any.new('Fragment', [Fragment, String])
-
-    # 6.7.1 Storage-class specifiers
-    Storage = Any.new('Storage-class specifiers', [:typedef, :extern, :static, nil])
   end
 
   class FragmentList < Node
@@ -73,6 +69,7 @@ module Chelsy
 
     def extern?; @storage == :extern end
     def static?; @storage == :static end
+    def init; nil end
   end
 
   # Struct or Union member with bit-field
@@ -114,6 +111,47 @@ module Chelsy
     def validate_node(node); Syntax::EnumMember.ensure(node) end
   end
 
+  # === 6.7.8 Initialization
+  class Designator < Element
+  end
+
+  # { [1] = 10, [2] = 20, ...}
+  class IndexDesignator < Designator
+    attr_reader :index
+
+    def initialize(index, **rest)
+      @index = Syntax::Expr.ensure(index)
+      super **rest
+    end
+  end
+
+  # { .a = 10, .b = 20, ...}
+  class MemberDesignator < Designator
+    attr_reader :name
+
+    def initialize(name, **rest)
+      @name = Syntax::Ident.ensure(name)
+      super **rest
+    end
+  end
+
+  class Initializer < Element
+    attr_reader :designator, :value
+
+    def initialize(value, designator=nil, **rest)
+      @value = value
+      @designator = designator
+      super **rest
+    end
+  end
+
+  class InitializerList < Element
+    include NodeList
+
+    private
+    def validate_node(node); Syntax::Initializer.ensure(node) end
+  end
+
   class Expr < Element
   end
 
@@ -121,9 +159,6 @@ module Chelsy
   end
 
   module Syntax
-    Ident    = Any.new('Identifier', [Symbol])
-    Expr     = Any.new('Expression', [Expr, Symbol])
-    TopLevel = Any.new('TopLevel', [Declarative])
   end
 
   # `Document` represents a _translation unit_ (file).
@@ -155,7 +190,6 @@ module Chelsy
   end
 
   module Syntax
-    Type = Any.new('TypeSpecifier', [Chelsy::Type::Base, :void])
   end
 
   # Function and prototype params
@@ -171,8 +205,6 @@ module Chelsy
   end
 
   module Syntax
-    Param = Any.new('Parameter', [Param, :void, :"..."])
-    ProtoParam = Any.new('Prototype Parameter', [Chelsy::Param, Symbol, Chelsy::Type::Base, :"..."])
   end
 
   class ParamList < Element
@@ -392,8 +424,6 @@ module Chelsy
   end
 
   module Syntax
-    ArraySize = Any.new('ArraySize', [Chelsy::Expr, Symbol])
-    BitField = Any.new('BitField', [Chelsy::Constant::Integral])
   end
 
   # 6.4.5 String literals
@@ -618,14 +648,21 @@ module Chelsy
   # 6.7 Declarations
   class Declaration < Declarative
     attr_reader :name, :type
-    # TODO initializer
 
-    def initialize(name, type, **rest)
+    def initialize(name, type, init=nil, **rest)
       @name = Syntax::Ident.ensure(name)
       @type = Syntax::Type.ensure(type)
+      @init = case init
+              when Enumerable
+                InitializerList.new(init)
+              else
+                init
+              end
 
       super(**rest)
     end
+
+    def init; @init end
   end
 
   class Typedef < Declarative
@@ -638,13 +675,6 @@ module Chelsy
       rest[:storage] = :typedef
       super(**rest)
     end
-  end
-
-  module Syntax
-    BlockItem = Any.new('BlockItem', [Stmt, Chelsy::Declarative])
-    Declaration = Any.new('Declaration', [Chelsy::Declaration])
-    StructOrUnionMember = Any.new('StructOrUnionMember', [Chelsy::Declaration, Chelsy::BitField])
-    EnumMember = Any.new('EnumMember', [Chelsy::EnumMember, Symbol])
   end
 
   # = 6.9 External definitions
@@ -685,5 +715,24 @@ module Chelsy
     end
   end
 
+end
 
+module Chelsy
+  module Syntax
+    TopLevel = Any.new('TopLevel', [Declarative])
+    Type = Any.new('TypeSpecifier', [Chelsy::Type::Base, :void])
+    Ident = Any.new('Identifier', [Symbol])
+    Expr = Any.new('Expression', [Expr, Symbol])
+    Fragment = Any.new('Fragment', [Fragment, String])
+    Storage = Any.new('Storage-class specifiers', [:typedef, :extern, :static, nil])
+    Param = Any.new('Parameter', [Param, :void, :"..."])
+    ProtoParam = Any.new('Prototype Parameter', [Chelsy::Param, Symbol, Chelsy::Type::Base, :"..."])
+    ArraySize = Any.new('ArraySize', [Chelsy::Expr, Symbol])
+    BitField = Any.new('BitField', [Chelsy::Constant::Integral])
+    StructOrUnionMember = Any.new('StructOrUnionMember', [Chelsy::Declaration, Chelsy::BitField])
+    EnumMember = Any.new('EnumMember', [Chelsy::EnumMember, Symbol])
+    Initializer = Any.new('Initializer', [Chelsy::Expr, Symbol, Chelsy::Initializer, Chelsy::InitializerList])
+    BlockItem   = Any.new('BlockItem', [Stmt, Chelsy::Declarative])
+    Declaration = Any.new('Declaration', [Chelsy::Declaration])
+  end
 end

@@ -87,6 +87,10 @@ module Chelsy
         translate_function(node)
       when Param
         translate_param(node)
+      when Initializer
+        translate_initializer(node)
+      when InitializerList
+        translate_initializer_list(node)
       else
         raise ArgumentError, "Unrecognized AST element: #{node.inspect}"
       end
@@ -339,8 +343,46 @@ module Chelsy
         node.storage.to_s,
         translate_typed_name(node.type, node.name),
       ]
+      .tap {|src|
+        unless node.init.nil?
+          src << '='
+          src << translate(node.init)
+        end
+      }
       .join(' ')
       .strip
+    end
+
+    def translate_designator(node)
+      case node
+      when IndexDesignator
+        "[#{node.index}]"
+      when MemberDesignator
+        ".#{node.name}"
+      else
+        raise NotImplementedError, 'designator must be Index or Member'
+      end
+    end
+
+    def translate_initializer(node)
+      if node.designator
+        [
+          translate_designator(node.designator),
+          '=',
+          translate(node.value),
+        ]
+        .join(' ')
+      else
+        translate(node.value)
+      end
+    end
+
+    def translate_initializer_list(node)
+      node
+      .map {|m| translate(m)}
+      .join(', ')
+      .insert( 0, '{ ')
+      .insert(-1, ' }')
     end
 
     def translate_bit_field(node)
