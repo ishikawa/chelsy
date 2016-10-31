@@ -544,6 +544,36 @@ module Chelsy
       def self.operator; :"--" end
     end
 
+    # Unary plus
+    class Plus < Prefix
+      def self.operator; :"+" end
+    end
+
+    # Unary minus
+    class Minus < Prefix
+      def self.operator; :"-" end
+    end
+
+    # Logical NOT
+    class Not < Prefix
+      def self.operator; :"!" end
+    end
+
+    # Bitwise NOT
+    class BitwiseNot < Prefix
+      def self.operator; :"~" end
+    end
+
+    # Indirection (dereference)
+    class Dereference < Prefix
+      def self.operator; :"*" end
+    end
+
+    # Address-of
+    class Address < Prefix
+      def self.operator; :"&" end
+    end
+
     # == 6.5.5 Multiplicative operators
 
     # Multiplication
@@ -581,11 +611,17 @@ module Chelsy
       # -- highest
       [
         PostfixIncrement, PostfixDecrement,
-        PrefixIncrement, PrefixDecrement,
         Call,
         Subscription,
         Access,
         # Compound Literal
+      ],
+      [
+        PrefixIncrement, PrefixDecrement,
+        Plus, Minus,
+        Not, BitwiseNot,
+        Dereference,
+        Address,
       ],
       [
         Mul, Div, Rem,

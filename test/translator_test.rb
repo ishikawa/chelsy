@@ -236,7 +236,8 @@ PROG
     node = Operator::PostfixDecrement.new(:x)
     assert_equal 'x--', translator.translate(node)
 
-    # TODO incr/decr pointer expression should be `(*p)++`
+    node = Operator::PostfixIncrement.new(Operator::Dereference.new(:p))
+    assert_equal '(*p)++', translator.translate(node)
   end
 
   def test_prefix_incr_decr
