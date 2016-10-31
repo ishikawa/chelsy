@@ -533,6 +533,17 @@ module Chelsy
       def self.postfix?; true end
     end
 
+    # === 6.5.3.1 Prefix increment and decrement operators
+    class PrefixIncrement < Unary
+      def self.operator; :"++" end
+      def self.postfix?; false end
+    end
+
+    class PrefixDecrement < Unary
+      def self.operator; :"--" end
+      def self.postfix?; false end
+    end
+
     # == 6.5.5 Multiplicative operators
 
     # Multiplication
@@ -570,6 +581,7 @@ module Chelsy
       # -- highest
       [
         PostfixIncrement, PostfixDecrement,
+        PrefixIncrement, PrefixDecrement,
         Call,
         Subscription,
         Access,
@@ -595,7 +607,7 @@ module Chelsy
 
     class Base
       def self.precedence
-        OPERATOR_PRECEDENCE[self]
+        OPERATOR_PRECEDENCE[self] or raise NotImplementedError
       end
     end
   end

@@ -239,6 +239,19 @@ PROG
     # TODO incr/decr pointer expression should be `(*p)++`
   end
 
+  def test_prefix_incr_decr
+    node = Operator::PrefixIncrement.new(:x)
+    assert_equal '++x', translator.translate(node)
+
+    node = Operator::PrefixDecrement.new(:x)
+    assert_equal '--x', translator.translate(node)
+
+    node = Operator::Sub.new(
+        Operator::PostfixDecrement.new(:x),
+        Operator::PrefixDecrement.new(:x))
+    assert_equal 'x-- - --x', translator.translate(node)
+  end
+
   def test_binary_ops
     node = Operator::Mul.new(:x, :y)
     assert_equal 'x * y', translator.translate(node)
