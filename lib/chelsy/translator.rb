@@ -269,12 +269,12 @@ module Chelsy
         translate_function_call(node)
       when Operator::Access
         translate_member_access(node)
+      when Operator::Postfix
+        translate_postfix_operator(node)
+      when Operator::Prefix
+        translate_prefix_operator(node)
       else
-        if node.class.postfix?
-          translate_postfix_operator(node)
-        else
-          translate_prefix_operator(node)
-        end
+        raise NotImplementedError, "Unrecognized unary operator: #{node.inspect}"
       end
     end
 

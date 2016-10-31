@@ -454,12 +454,16 @@ module Chelsy
     class Unary < Base
       attr_reader :operand
 
-      def self.postfix?; false end
-
       def initialize(operand, **rest)
         @operand = Syntax::Expr.ensure(operand)
         super **rest
       end
+    end
+
+    class Postfix < Unary
+    end
+
+    class Prefix < Unary
     end
 
     class Binary < Base
@@ -476,7 +480,7 @@ module Chelsy
     end
 
     # === 6.5.2.1 Array subscripting
-    class Subscription < Unary
+    class Subscription < Postfix
       attr_reader :index
 
       def self.operator; :"[]" end
@@ -490,7 +494,7 @@ module Chelsy
     end
 
     # === 6.5.2.2 Function calls
-    class Call < Unary
+    class Call < Postfix
       attr_reader :args
 
       def self.operator; :"()" end
@@ -505,7 +509,7 @@ module Chelsy
     end
 
     # === 6.5.2.3 Structure and union members
-    class Access < Unary
+    class Access < Postfix
       attr_reader :name
 
       def self.operator; :"." end
@@ -523,25 +527,21 @@ module Chelsy
     end
 
     # === 6.5.2.4 Postfix increment and decrement operators
-    class PostfixIncrement < Unary
+    class PostfixIncrement < Postfix
       def self.operator; :"++" end
-      def self.postfix?; true end
     end
 
-    class PostfixDecrement < Unary
+    class PostfixDecrement < Postfix
       def self.operator; :"--" end
-      def self.postfix?; true end
     end
 
-    # === 6.5.3.1 Prefix increment and decrement operators
-    class PrefixIncrement < Unary
+    # === 6.5.3 Unary operators
+    class PrefixIncrement < Prefix
       def self.operator; :"++" end
-      def self.postfix?; false end
     end
 
-    class PrefixDecrement < Unary
+    class PrefixDecrement < Prefix
       def self.operator; :"--" end
-      def self.postfix?; false end
     end
 
     # == 6.5.5 Multiplicative operators
