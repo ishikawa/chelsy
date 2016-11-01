@@ -253,6 +253,11 @@ PROG
     assert_equal 'x-- - --x', translator.translate(node)
   end
 
+  def test_type_cast
+    node = Operator::Cast.new(:x, Type::Pointer.new(Type::Int.new()))
+    assert_equal '(int *)x', translator.translate(node)
+  end
+
   def test_binary_ops
     node = Operator::Mul.new(:x, :y)
     assert_equal 'x * y', translator.translate(node)

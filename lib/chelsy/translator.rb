@@ -269,6 +269,8 @@ module Chelsy
         translate_function_call(node)
       when Operator::Access
         translate_member_access(node)
+      when Operator::Cast
+        translate_type_cast(node)
       when Operator::Postfix
         translate_postfix_operator(node)
       when Operator::Prefix
@@ -307,6 +309,11 @@ module Chelsy
     def translate_postfix_operator(node)
       operand = expr(node.operand, node)
       "#{operand}#{node.class.operator}"
+    end
+
+    def translate_type_cast(node)
+      operand = expr(node.operand, node)
+      "(#{translate node.type})#{operand}"
     end
 
     def translate_binary_operator(node)

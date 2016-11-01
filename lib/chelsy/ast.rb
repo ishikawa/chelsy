@@ -574,6 +574,18 @@ module Chelsy
       def self.operator; :"&" end
     end
 
+    # Type cast
+    class Cast < Unary
+      attr_reader :type
+
+      def self.operator; :"()" end
+
+      def initialize(operand, type, **rest)
+        @type = Syntax::Type.ensure(type)
+        super operand, **rest
+      end
+    end
+
     # == 6.5.5 Multiplicative operators
 
     # Multiplication
@@ -620,6 +632,7 @@ module Chelsy
         PrefixIncrement, PrefixDecrement,
         Plus, Minus,
         Not, BitwiseNot,
+        Cast,
         Dereference,
         Address,
       ],
