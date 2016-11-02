@@ -455,15 +455,22 @@ module Chelsy
       attr_reader :operand
 
       def initialize(operand, **rest)
-        @operand = Syntax::Expr.ensure(operand)
+        # `sizeof` operator accepts expr or type as its operand.
+        @operand = operand
         super **rest
       end
     end
 
     class Postfix < Unary
+      def initialize(operand, **rest)
+        super Syntax::Expr.ensure(operand), **rest
+      end
     end
 
     class Prefix < Unary
+      def initialize(operand, **rest)
+        super Syntax::Expr.ensure(operand), **rest
+      end
     end
 
     class Binary < Base
@@ -575,7 +582,7 @@ module Chelsy
     end
 
     # Type cast
-    class Cast < Unary
+    class Cast < Prefix
       attr_reader :type
 
       def self.operator; :"()" end
@@ -583,6 +590,15 @@ module Chelsy
       def initialize(operand, type, **rest)
         @type = Syntax::Type.ensure(type)
         super operand, **rest
+      end
+    end
+
+    # Size-of
+    class SizeOf < Unary
+      def self.operator; :"sizeof" end
+
+      def initialize(operand, **rest)
+        super Syntax::ExprOrType.ensure(operand), **rest
       end
     end
 
@@ -635,6 +651,7 @@ module Chelsy
         Cast,
         Dereference,
         Address,
+        SizeOf,
       ],
       [
         Mul, Div, Rem,

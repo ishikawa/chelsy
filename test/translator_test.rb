@@ -258,6 +258,15 @@ PROG
     assert_equal '(int *)x', translator.translate(node)
   end
 
+  def test_sizeof
+    node = Operator::SizeOf.new(Type::Int.new())
+    assert_equal 'sizeof(int)', translator.translate(node)
+    node = Operator::SizeOf.new(Operator::Subscription.new(:x, Constant::Int.new(0)))
+    assert_equal 'sizeof(x[0])', translator.translate(node)
+    node = Operator::SizeOf.new(Operator::Add.new(:x, :y))
+    assert_equal 'sizeof(x + y)', translator.translate(node)
+  end
+
   def test_binary_ops
     node = Operator::Mul.new(:x, :y)
     assert_equal 'x * y', translator.translate(node)
