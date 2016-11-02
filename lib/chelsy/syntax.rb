@@ -1,7 +1,4 @@
-module Chelsy; end
-
-# Syntax rules
-module Chelsy::Syntax
+module Chelsy; module Syntax
 
   class Rule
     attr_reader :name
@@ -24,14 +21,22 @@ module Chelsy::Syntax
   end
 
   class Any < Rule
-    def initialize(name, classes)
-      @classes = classes
+    def initialize(name, constraints)
+      @constraints = constraints.dup
       super name
     end
 
     def accept?(node)
-      @classes.any? {|klass| klass === node }
+      @constraints.any? do |constraint|
+        case constraint
+        when Chelsy::Syntax::Rule
+          constraint.accept?(node)
+        else
+          constraint === node
+        end
+      end
     end
+
   end
 
-end
+end; end
