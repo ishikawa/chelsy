@@ -279,6 +279,14 @@ PROG
     assert_equal '(x + y) * z', translator.translate(node)
   end
 
+  def test_ternary_conditional
+    node = Operator::Conditional.new(
+      Operator::Not.new(Operator::Not.new(:b)),
+      Operator::BitwiseAnd.new(:x, Constant::Int.new(7, base: 16)),
+      :x)
+    assert_equal '!!b ? (x & 0x7) : x', translator.translate(node)
+  end
+
   # = Statements and blocks
 
   def test_null_stmt

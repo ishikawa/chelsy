@@ -483,7 +483,19 @@ module Chelsy
       end
     end
 
-    class Ternary < Base
+    # Ternary conditional
+    class Conditional < Base
+      attr_reader :condition, :then, :else
+
+      def self.operator; :"?:" end
+
+      def initialize(condition, then_expr, else_expr, **rest)
+        @condition = Syntax::Expr.ensure(condition)
+        @then = Syntax::Expr.ensure(then_expr)
+        @else = Syntax::Expr.ensure(else_expr)
+
+        super **rest
+      end
     end
 
     # === 6.5.2.1 Array subscripting
@@ -628,6 +640,111 @@ module Chelsy
     class Sub < Binary
       def self.operator; :- end
     end
+
+    # Bitwise left shift and right shift
+    class BitwiseLeftShift < Binary
+      def self.operator; :<< end
+    end
+
+    class BitwiseRightShift < Binary
+      def self.operator; :>> end
+    end
+
+    # For relational operators < and ≤ respectively
+    class LessThan < Binary
+      def self.operator; :< end
+    end
+
+    class LessThanOrEqual < Binary
+      def self.operator; :<= end
+    end
+
+    # For relational operators > and ≥ respectively
+    class GreaterThan < Binary
+      def self.operator; :> end
+    end
+
+    class GreaterThanOrEqual < Binary
+      def self.operator; :>= end
+    end
+
+    # For relational = and ≠ respectively
+    class Equal < Binary
+      def self.operator; :== end
+    end
+
+    class NotEqual < Binary
+      def self.operator; :"!=" end
+    end
+
+    # Bitwise AND, XOR, OR
+    class BitwiseAnd < Binary
+      def self.operator; :& end
+    end
+
+    class BitwiseXor < Binary
+      def self.operator; :"^" end
+    end
+
+    class BitwiseOr < Binary
+      def self.operator; :"|" end
+    end
+
+    # Logical AND, OR
+    class And < Binary
+      def self.operator; :"&&" end
+    end
+
+    class Or < Binary
+      def self.operator; :"||" end
+    end
+
+    # === 6.5.16 Assignment operators
+
+    class Assign < Binary
+      def self.operator; :"=" end
+    end
+
+    class AssignAdd < Binary
+      def self.operator; :"+=" end
+    end
+
+    class AssignSub < Binary
+      def self.operator; :"-=" end
+    end
+
+    class AssignMul < Binary
+      def self.operator; :"*=" end
+    end
+
+    class AssignDiv < Binary
+      def self.operator; :"/=" end
+    end
+
+    class AssignRem < Binary
+      def self.operator; :"%=" end
+    end
+
+    class AssignBitwiseLeftShift < Binary
+      def self.operator; :"<<=" end
+    end
+
+    class AssignBitwiseLeftRight < Binary
+      def self.operator; :">>=" end
+    end
+
+    class AssignBitwiseAnd < Binary
+      def self.operator; :"&=" end
+    end
+
+    class AssignBitwiseXor < Binary
+      def self.operator; :"^=" end
+    end
+
+    class AssignBitwiseOr < Binary
+      def self.operator; :"|=" end
+    end
+
   end
 
   module Operator
@@ -658,6 +775,44 @@ module Chelsy
       ],
       [
         Add, Sub,
+      ],
+      [
+        BitwiseLeftShift, BitwiseRightShift,
+      ],
+      [
+        LessThan, LessThanOrEqual,
+        GreaterThan, GreaterThanOrEqual,
+      ],
+      [
+        Equal, NotEqual,
+      ],
+      [
+        BitwiseAnd,
+      ],
+      [
+        BitwiseXor,
+      ],
+      [
+        BitwiseOr,
+      ],
+      [
+        And,
+      ],
+      [
+        Or,
+      ],
+      [
+        Or,
+      ],
+      [
+        Conditional,
+      ],
+      [
+        Assign,
+        AssignAdd, AssignSub,
+        AssignMul, AssignDiv, AssignRem,
+        AssignBitwiseLeftShift, AssignBitwiseLeftRight,
+        AssignBitwiseAnd, AssignBitwiseXor, AssignBitwiseOr,
       ],
     ]
 

@@ -67,6 +67,8 @@ module Chelsy
         translate_unary_operator(node)
       when Operator::Binary
         translate_binary_operator(node)
+      when Operator::Conditional
+        translate_ternary_conditional(node)
 
       # Statements
       when EmptyStmt
@@ -327,6 +329,21 @@ module Chelsy
       lhs = expr(node.lhs, node)
       rhs = expr(node.rhs, node)
       "#{lhs} #{node.class.operator} #{rhs}"
+    end
+
+    def translate_ternary_conditional(node)
+      condition_expr = expr(node.condition, node)
+
+      # Expression between `?` and `:` must be parenthesized.
+      then_expr = case node.then
+                  when Operator::Binary, Operator::Conditional
+                    "(#{translate(node.then)})"
+                  else
+                    expr(node.then, node)
+                  end
+      else_expr = expr(node.else, node)
+
+      "#{condition_expr} ? #{then_expr} : #{else_expr}"
     end
 
     # = Statements
