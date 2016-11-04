@@ -962,12 +962,13 @@ module Chelsy
     Storage = Any.new('Storage-class specifiers', [:typedef, :extern, :static, nil])
     Param = Any.new('Parameter', [Chelsy::Param, :void, :"..."])
     ProtoParam = Any.new('Prototype Parameter', [Syntax::Param, Symbol, Chelsy::Type::Base])
-    ArraySize = Any.new('ArraySize', [Chelsy::Expr, Symbol])
+    ArraySize = Any.new('ArraySize', [Syntax::Expr])
     BitField = Any.new('BitField', [Chelsy::Constant::Integral])
     StructOrUnionMember = Any.new('StructOrUnionMember', [Chelsy::Declaration, Chelsy::BitField])
     EnumMember = Any.new('EnumMember', [Chelsy::EnumMember, Symbol])
-    Initializer = Any.new('Initializer', [Chelsy::Expr, Symbol, Chelsy::Initializer, Chelsy::InitializerList])
-    BlockItem   = Any.new('BlockItem', [Stmt, Chelsy::Declarative])
+    Initializer = Any.new('Initializer', [Syntax::Expr, Chelsy::Initializer, Chelsy::InitializerList])
+    Stmt = Any.new('BlockItem', [Chelsy::Stmt])
+    BlockItem   = Any.new('BlockItem', [Syntax::Stmt, Chelsy::Declarative])
     Declaration = Any.new('Declaration', [Chelsy::Declaration])
   end
 end
