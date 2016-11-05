@@ -299,6 +299,38 @@ PROG
     assert_equal '1', translator.translate(stmt)
   end
 
+  def test_if_stmt
+    stmt = If.new(
+      Operator::LessThan.new(:x, Constant::Int.new(0)),
+      Return.new(Constant::Int.new(1)))
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+if (x < 0) return 1
+PROG
+
+    stmt = If.new(
+      Operator::LessThan.new(:x, Constant::Int.new(0)),
+      Block.new([Return.new(Constant::Int.new(1))])
+    )
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+if (x < 0) {
+    return 1;
+}
+PROG
+
+    stmt = If.new(
+      Operator::LessThan.new(:x, Constant::Int.new(0)),
+      Block.new([Return.new(Constant::Int.new(1))]),
+      Block.new([Return.new(Constant::Int.new(2))])
+    )
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+if (x < 0) {
+    return 1;
+} else {
+    return 2;
+}
+PROG
+  end
+
   # = Declaration
 
   def test_initializer

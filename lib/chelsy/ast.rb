@@ -868,7 +868,20 @@ module Chelsy
     end
   end
 
-  # == 6.8.6.4 Thereturnstatement
+  # == 6.8.4.1 The if statement
+  class If < Stmt
+    attr_reader :condition, :then, :else
+
+    def initialize(condition_expr, then_stmt, else_stmt=nil, **rest)
+      @condition = Syntax::Expr.ensure(condition_expr)
+      @then = Syntax::Stmt::ensure(then_stmt)
+      @else = Syntax::Stmt::ensure(else_stmt) if else_stmt
+
+      super **rest
+    end
+  end
+
+  # == 6.8.6.4 The return statement
   class Return < Stmt
     attr_reader :expr
 
