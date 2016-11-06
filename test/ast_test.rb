@@ -11,7 +11,7 @@ class Chelsy::ASTTest < Minitest::Test
     assert f
     assert_equal :f, f.name
     assert_equal :void, f.return_type
-    assert ExprStmt === f.body.first
+    assert Expr === f.body.first
   end
 
   def test_block

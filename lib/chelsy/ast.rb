@@ -877,12 +877,8 @@ module Chelsy
 
     private
 
-    # Implicit convertion from Expr to ExprStmt
     def validate_node(node)
-      item = node
-      item = ExprStmt.new(node) if Syntax::Expr.accept?(node)
-
-      Syntax::BlockItem.ensure(item)
+      Syntax::BlockItem.ensure(node)
     end
   end
 
@@ -999,7 +995,10 @@ module Chelsy
     EnumMember = Any.new('EnumMember', [Chelsy::EnumMember, Symbol])
     Initializer = Any.new('Initializer', [Syntax::Expr, Chelsy::Initializer, Chelsy::InitializerList])
     Stmt = Any.new('BlockItem', [Chelsy::Stmt])
-    BlockItem   = Any.new('BlockItem', [Syntax::Stmt, Chelsy::Declarative])
+    BlockItem   = Any.new('BlockItem', [
+                    Syntax::Expr, # Treats Expr as ExprStmt
+                    Syntax::Stmt,
+                    Chelsy::Declarative])
     Declaration = Any.new('Declaration', [Chelsy::Declaration])
   end
 end
