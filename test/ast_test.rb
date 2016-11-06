@@ -14,6 +14,23 @@ class Chelsy::ASTTest < Minitest::Test
     assert ExprStmt === f.body.first
   end
 
+  def test_block
+    b = Block.new()
+
+    assert b.empty?
+    assert_equal 0, b.size
+
+    b << Return.new(Constant::Int.new(10))
+    refute b.empty?
+    assert_equal 1, b.size
+    assert_equal 10, b[0].expr.value
+
+    b[0, 1] = Return.new(Constant::Int.new(11))
+    assert_equal 11, b[0].expr.value
+    b[0] = Return.new(Constant::Int.new(12))
+    assert_equal 12, b[0].expr.value
+  end
+
   def test_struct
     s = Type::Struct.new(:s)
 

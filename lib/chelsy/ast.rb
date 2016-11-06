@@ -1,4 +1,5 @@
 require "chelsy/syntax"
+require "forwardable"
 
 module Chelsy
 
@@ -10,6 +11,9 @@ module Chelsy
   # The class must provide a method validate_node`
   module NodeList
     include Enumerable
+    extend Forwardable
+
+    def_delegators :@items, :size, :empty?, :[]
 
     def initialize(items=[], **rest)
       @items = items.map {|element| validate_node(element) }
@@ -21,12 +25,26 @@ module Chelsy
       self
     end
 
-    def size; @items.size end
-    def empty?; @items.empty? end
-
     def <<(node)
       @items << validate_node(node)
       self
+    end
+
+    def concat(enumerable)
+      enumerable.each {|it| @items << validate_node(it) }
+      self
+    end
+
+    def []=(*args)
+      value = args[-1]
+      value = case value
+              when Enumerable
+                value.map {|v| validate_node(v) }
+              else
+                validate_node(value)
+              end
+      args[-1] = value
+      @items.send(:[]=, *args)
     end
   end
 
