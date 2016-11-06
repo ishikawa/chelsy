@@ -5,7 +5,6 @@ include Chelsy
 doc = Document.new
 
 doc.fragments << Directive::Include.new("stdio.h", system: true)
-doc.fragments << ''
 
 doc << Function.new(:main, Type::Int.new, [:void]) do |b|
   b << Operator::Call.new(:printf, [Constant::String.new("Hello, Chelsy!\n")])

@@ -112,7 +112,13 @@ module Chelsy
     end
 
     def translate_document(node)
-      node.map {|nd| translate(nd) }.join('')
+      node.map {|nd| translate(nd) }
+      .join("\n\n")
+      .tap do |src|
+        # Document's fragments and body should be separated by empty line for
+        # source code readability.
+        src.insert(0, "\n") unless src.empty? || node.fragments.empty?
+      end
     end
 
     def translate_ident(node)

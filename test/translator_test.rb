@@ -473,4 +473,35 @@ PROG
 PROG
   end
 
+  # document
+  def test_document
+    # empty
+    doc = Document.new
+    assert_equal '', translator.translate(doc)
+
+    # stmts
+    doc = Document.new
+    doc.fragments << Directive::Include.new("stdio.h", system: true)
+
+    doc << Function.new(:f1, Type::Int.new, [:void]) do |b|
+      b << Return.new(Constant::Int.new(1))
+    end
+    doc << Function.new(:f2, Type::Int.new, [:void]) do |b|
+      b << Return.new(Constant::Int.new(2))
+    end
+
+    assert_equal <<PROG, translator.translate(doc) + "\n"
+#include <stdio.h>
+
+int f1(void) {
+    return 1;
+}
+
+int f2(void) {
+    return 2;
+}
+PROG
+
+  end
+
 end
