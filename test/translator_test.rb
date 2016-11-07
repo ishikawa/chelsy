@@ -331,6 +331,25 @@ if (x < 0) {
 PROG
   end
 
+  def test_while_stmt
+    stmt = While.new(
+      Operator::LessThan.new(:x, Constant::Int.new(0)),
+      Operator::AssignAdd.new(:x, Constant::Int.new(1)))
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+while (x < 0) x += 1
+PROG
+
+    stmt = While.new(
+      Operator::LessThan.new(:x, Constant::Int.new(0)),
+      Block.new([Operator::AssignAdd.new(:x, Constant::Int.new(1))])
+    )
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+while (x < 0) {
+    x += 1;
+}
+PROG
+  end
+
   # = Declaration
 
   def test_initializer

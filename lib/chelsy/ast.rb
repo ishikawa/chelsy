@@ -882,7 +882,7 @@ module Chelsy
     end
   end
 
-  # == 6.8.4.1 The if statement
+  # === 6.8.4.1 The if statement
   class If < Stmt
     attr_reader :condition, :then, :else
 
@@ -895,7 +895,19 @@ module Chelsy
     end
   end
 
-  # == 6.8.6.4 The return statement
+  # == 6.8.5 Iteration statements
+  class While < Stmt
+    attr_reader :condition, :body
+
+    def initialize(condition_expr, body_stmt, **rest)
+      @condition = Syntax::Expr.ensure(condition_expr)
+      @body = Syntax::Stmt::ensure(body_stmt)
+
+      super **rest
+    end
+  end
+
+  # === 6.8.6.4 The return statement
   class Return < Stmt
     attr_reader :expr
 
@@ -994,9 +1006,10 @@ module Chelsy
     StructOrUnionMember = Any.new('StructOrUnionMember', [Chelsy::Declaration, Chelsy::BitField])
     EnumMember = Any.new('EnumMember', [Chelsy::EnumMember, Symbol])
     Initializer = Any.new('Initializer', [Syntax::Expr, Chelsy::Initializer, Chelsy::InitializerList])
-    Stmt = Any.new('BlockItem', [Chelsy::Stmt])
-    BlockItem   = Any.new('BlockItem', [
+    Stmt = Any.new('Statement', [
                     Syntax::Expr, # Treats Expr as ExprStmt
+                    Chelsy::Stmt])
+    BlockItem   = Any.new('BlockItem', [
                     Syntax::Stmt,
                     Chelsy::Declarative])
     Declaration = Any.new('Declaration', [Chelsy::Declaration])

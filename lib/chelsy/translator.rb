@@ -77,6 +77,8 @@ module Chelsy
         translate_expr_stmt(node)
       when If
         translate_if(node)
+      when While
+        translate_while(node)
       when Return
         translate_return(node)
       when Block
@@ -368,6 +370,10 @@ module Chelsy
       "if (#{translate node.condition}) #{translate node.then}".tap do |src|
         src << " else #{translate node.else}" if node.else
       end
+    end
+
+    def translate_while(node)
+      "while (#{translate node.condition}) #{translate node.body}"
     end
 
     def translate_return(node)
