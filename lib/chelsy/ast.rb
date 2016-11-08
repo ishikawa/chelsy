@@ -907,6 +907,17 @@ module Chelsy
     end
   end
 
+  class DoWhile < Stmt
+    attr_reader :condition, :body
+
+    def initialize(condition_expr, body_stmt, **rest)
+      @condition = Syntax::Expr.ensure(condition_expr)
+      @body = Syntax::Stmt::ensure(body_stmt)
+
+      super **rest
+    end
+  end
+
   # === 6.8.6.4 The return statement
   class Return < Stmt
     attr_reader :expr

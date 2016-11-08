@@ -350,6 +350,24 @@ while (x < 0) {
 PROG
   end
 
+  def test_do_while_stmt
+    stmt = DoWhile.new(
+      Operator::LessThan.new(:x, Constant::Int.new(0)),
+      Operator::AssignAdd.new(:x, Constant::Int.new(1)))
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+do x += 1 while (x < 0)
+PROG
+
+    stmt = DoWhile.new(
+      Operator::LessThan.new(:x, Constant::Int.new(0)),
+      Block.new([Operator::AssignAdd.new(:x, Constant::Int.new(1))])
+    )
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+do {
+    x += 1;
+} while (x < 0)
+PROG
+  end
   # = Declaration
 
   def test_initializer

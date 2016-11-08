@@ -79,6 +79,8 @@ module Chelsy
         translate_if(node)
       when While
         translate_while(node)
+      when DoWhile
+        translate_do_while(node)
       when Return
         translate_return(node)
       when Block
@@ -374,6 +376,10 @@ module Chelsy
 
     def translate_while(node)
       "while (#{translate node.condition}) #{translate node.body}"
+    end
+
+    def translate_do_while(node)
+      "do #{translate node.body} while (#{translate node.condition})"
     end
 
     def translate_return(node)
