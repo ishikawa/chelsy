@@ -368,6 +368,26 @@ do {
 } while (x < 0)
 PROG
   end
+
+  def test_for_stmt
+    stmt = For.new(Block.new([Operator::AssignAdd.new(:x, Constant::Int.new(1))]))
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+for (;;) {
+    x += 1;
+}
+PROG
+    stmt = For.new(
+      Declaration.new(:i, Type::Int.new, Constant::Int.new(0)),
+      Operator::LessThan.new(:i, Constant::Int.new(10)),
+      Operator::PostfixIncrement.new(:i),
+      Block.new([Operator::AssignAdd.new(:x, Constant::Int.new(1))]))
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+for (int i = 0; i < 10; i++) {
+    x += 1;
+}
+PROG
+  end
+
   # = Declaration
 
   def test_initializer

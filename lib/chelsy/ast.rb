@@ -918,6 +918,19 @@ module Chelsy
     end
   end
 
+  class For < Stmt
+    attr_reader :init, :condition, :loop, :body
+
+    def initialize(init_stmt=nil, condition_expr=nil, loop_expr=nil, body_stmt, **rest)
+      @init = Syntax::BlockItem::ensure(init_stmt) if init_stmt
+      @condition = Syntax::Expr.ensure(condition_expr) if condition_expr
+      @loop = Syntax::Expr.ensure(loop_expr) if loop_expr
+      @body = Syntax::Stmt::ensure(body_stmt)
+
+      super **rest
+    end
+  end
+
   # === 6.8.6.4 The return statement
   class Return < Stmt
     attr_reader :expr
