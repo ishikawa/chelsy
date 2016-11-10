@@ -931,6 +931,15 @@ module Chelsy
     end
   end
 
+  # TODO Labeled statements
+  # TODO Goto
+
+  class Continue < Stmt
+  end
+
+  class Break < Stmt
+  end
+
   # === 6.8.6.4 The return statement
   class Return < Stmt
     attr_reader :expr

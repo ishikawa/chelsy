@@ -370,10 +370,14 @@ PROG
   end
 
   def test_for_stmt
-    stmt = For.new(Block.new([Operator::AssignAdd.new(:x, Constant::Int.new(1))]))
+    stmt = For.new(Block.new([
+      Break.new,
+      Continue.new,
+    ]))
     assert_equal <<PROG, translator.translate(stmt) + "\n"
 for (;;) {
-    x += 1;
+    break;
+    continue;
 }
 PROG
     stmt = For.new(

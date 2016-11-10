@@ -83,6 +83,10 @@ module Chelsy
         translate_do_while(node)
       when For
         translate_for(node)
+      when Break
+        translate_break(node)
+      when Continue
+        translate_continue(node)
       when Return
         translate_return(node)
       when Block
@@ -391,6 +395,9 @@ module Chelsy
 
       "for (#{init};#{cond};#{loop_expr}) #{translate node.body}"
     end
+
+    def translate_break(node); 'break' end
+    def translate_continue(node); 'continue' end
 
     def translate_return(node)
       if node.expr
