@@ -931,8 +931,24 @@ module Chelsy
     end
   end
 
-  # TODO Labeled statements
-  # TODO Goto
+  class Labeled < Stmt
+    attr_reader :label, :stmt
+
+    def initialize(label, stmt, **rest)
+      @label = Syntax::Ident.ensure(label)
+      @stmt = Syntax::Stmt.ensure(stmt)
+      super **rest
+    end
+  end
+
+  class Goto < Stmt
+    attr_reader :label
+
+    def initialize(label, **rest)
+      @label = Syntax::Ident.ensure(label)
+      super **rest
+    end
+  end
 
   class Continue < Stmt
   end

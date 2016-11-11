@@ -392,6 +392,23 @@ for (int i = 0; i < 10; i++) {
 PROG
   end
 
+  def test_goto
+    stmt = While.new(:loop1, Block.new([
+      While.new(:loop2, Block.new([
+        If.new(:want_out, Goto.new(:end_loop1))
+      ])),
+      Labeled.new(:end_loop1, EmptyStmt.new),
+    ]))
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+while (loop1) {
+    while (loop2) {
+        if (want_out) goto end_loop1;
+    }
+    end_loop1: ;
+}
+PROG
+  end
+
   # = Declaration
 
   def test_initializer

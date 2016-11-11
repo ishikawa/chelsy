@@ -87,6 +87,10 @@ module Chelsy
         translate_break(node)
       when Continue
         translate_continue(node)
+      when Labeled
+        translate_labeled(node)
+      when Goto
+        translate_goto(node)
       when Return
         translate_return(node)
       when Block
@@ -399,6 +403,14 @@ module Chelsy
     def translate_break(node); 'break' end
     def translate_continue(node); 'continue' end
 
+    def translate_goto(node)
+      "goto #{node.label}"
+    end
+
+    def translate_labeled(node)
+      "#{node.label}: #{translate node.stmt}"
+    end
+
     def translate_return(node)
       if node.expr
         'return ' << translate(node.expr)
@@ -567,6 +579,23 @@ module Chelsy
       "{\n#{body}\n#{indent}}"
     end
 
+    def should_terminate_with_semicolon(node)
+      case node
+      when If
+        if node.else
+          should_terminate_with_semicolon(node.else)
+        else
+          should_terminate_with_semicolon(node.then)
+        end
+      when While, For
+        should_terminate_with_semicolon(node.body)
+      when Block
+        false
+      else
+        true
+      end
+    end
+
     def translate_stmts_with_indent(node)
       @indent_level += 1
 
@@ -575,12 +604,7 @@ module Chelsy
           src << translate(item)
 
           # terminate ';' if needed
-          case item
-          when Block
-            src
-          else
-            src << ';'
-          end
+          src << ';' if should_terminate_with_semicolon(item)
         end
       end
 
