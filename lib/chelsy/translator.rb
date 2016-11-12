@@ -77,6 +77,8 @@ module Chelsy
         translate_expr_stmt(node)
       when If
         translate_if(node)
+      when Switch
+        translate_switch(node)
       when While
         translate_while(node)
       when DoWhile
@@ -87,6 +89,8 @@ module Chelsy
         translate_break(node)
       when Continue
         translate_continue(node)
+      when Case
+        translate_case(node)
       when Labeled
         translate_labeled(node)
       when Goto
@@ -384,6 +388,10 @@ module Chelsy
       end
     end
 
+    def translate_switch(node)
+      "switch (#{translate node.expr}) #{translate node.stmt}"
+    end
+
     def translate_while(node)
       "while (#{translate node.condition}) #{translate node.body}"
     end
@@ -405,6 +413,10 @@ module Chelsy
 
     def translate_goto(node)
       "goto #{node.label}"
+    end
+
+    def translate_case(node)
+      "case #{translate node.expr}: #{translate node.stmt}"
     end
 
     def translate_labeled(node)

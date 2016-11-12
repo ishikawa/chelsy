@@ -854,6 +854,17 @@ module Chelsy
 
   # = 6.8 Statements and blocks
 
+  # == 6.8.1 Labeled statements
+  class Labeled < Stmt
+    attr_reader :label, :stmt
+
+    def initialize(label, stmt, **rest)
+      @label = Syntax::Ident.ensure(label)
+      @stmt = Syntax::Stmt.ensure(stmt)
+      super **rest
+    end
+  end
+
   # == 6.8.3 Expression and null statements
 
   # A null statement (consisting of just a semicolon) performs no operations.
@@ -895,6 +906,26 @@ module Chelsy
     end
   end
 
+  # === 6.8.4.2 Theswitchstatement
+  class Switch < Stmt
+    attr_reader :expr, :stmt
+
+    def initialize(expr, stmt, **rest)
+      @expr = Syntax::Expr.ensure(expr)
+      @stmt = Syntax::Stmt.ensure(stmt)
+      super **rest
+    end
+  end
+
+  class Case < Labeled
+    attr_reader :expr
+
+    def initialize(expr, stmt, **rest)
+      @expr = Syntax::Expr.ensure(expr)
+      super :case, stmt, **rest
+    end
+  end
+
   # == 6.8.5 Iteration statements
   class While < Stmt
     attr_reader :condition, :body
@@ -927,16 +958,6 @@ module Chelsy
       @loop = Syntax::Expr.ensure(loop_expr) if loop_expr
       @body = Syntax::Stmt::ensure(body_stmt)
 
-      super **rest
-    end
-  end
-
-  class Labeled < Stmt
-    attr_reader :label, :stmt
-
-    def initialize(label, stmt, **rest)
-      @label = Syntax::Ident.ensure(label)
-      @stmt = Syntax::Stmt.ensure(stmt)
       super **rest
     end
   end

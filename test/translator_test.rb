@@ -331,6 +331,26 @@ if (x < 0) {
 PROG
   end
 
+  def test_switch_stmt
+    stmt = Switch.new(
+      :x,
+      Block.new([
+        Case.new(Constant::Int.new(1), Operator::PostfixIncrement.new(:x)),
+        Break.new,
+        Labeled.new(:default, Operator::PostfixDecrement.new(:x)),
+        Break.new,
+      ])
+    )
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+switch (x) {
+    case 1: x++;
+    break;
+    default: x--;
+    break;
+}
+PROG
+  end
+
   def test_while_stmt
     stmt = While.new(
       Operator::LessThan.new(:x, Constant::Int.new(0)),
