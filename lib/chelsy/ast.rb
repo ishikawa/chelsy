@@ -823,9 +823,6 @@ module Chelsy
         Or,
       ],
       [
-        Or,
-      ],
-      [
         Conditional,
       ],
       [
