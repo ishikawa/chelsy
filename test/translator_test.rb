@@ -277,6 +277,11 @@ PROG
     node = Operator::Add.new(:x, :y)
     node = Operator::Mul.new(node, :z)
     assert_equal '(x + y) * z', translator.translate(node)
+
+    node = Operator::Comma.new(
+      Operator::Add.new(:x, :y),
+      Operator::Mul.new(:x, :y))
+    assert_equal 'x + y, x * y', translator.translate(node)
   end
 
   def test_ternary_conditional

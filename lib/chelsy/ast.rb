@@ -763,7 +763,9 @@ module Chelsy
       def self.operator; :"|=" end
     end
 
-    # TODO 6.5.17 Comma operator
+    class Comma < Binary
+      def self.operator; :"," end
+    end
   end
 
   module Operator
@@ -832,6 +834,9 @@ module Chelsy
         AssignMul, AssignDiv, AssignRem,
         AssignBitwiseLeftShift, AssignBitwiseLeftRight,
         AssignBitwiseAnd, AssignBitwiseXor, AssignBitwiseOr,
+      ],
+      [
+        Comma,
       ],
     ]
 

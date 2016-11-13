@@ -354,7 +354,13 @@ module Chelsy
     def translate_binary_operator(node)
       lhs = expr(node.lhs, node)
       rhs = expr(node.rhs, node)
-      "#{lhs} #{node.class.operator} #{rhs}"
+
+      case node
+      when Operator::Comma
+        "#{lhs}#{node.class.operator} #{rhs}"
+      else
+        "#{lhs} #{node.class.operator} #{rhs}"
+      end
     end
 
     def translate_ternary_conditional(node)
