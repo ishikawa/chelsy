@@ -343,10 +343,30 @@ PROG
     )
     assert_equal <<PROG, translator.translate(stmt) + "\n"
 switch (x) {
-    case 1: x++;
+case 1:
+    x++;
     break;
-    default: x--;
+default:
+    x--;
     break;
+}
+PROG
+  end
+
+  def test_goto
+    stmt = While.new(:loop1, Block.new([
+      While.new(:loop2, Block.new([
+        If.new(:want_out, Goto.new(:end_loop1))
+      ])),
+      Labeled.new(:end_loop1, EmptyStmt.new),
+    ]))
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+while (loop1) {
+    while (loop2) {
+        if (want_out) goto end_loop1;
+    }
+end_loop1:
+    ;
 }
 PROG
   end
@@ -408,23 +428,6 @@ PROG
     assert_equal <<PROG, translator.translate(stmt) + "\n"
 for (int i = 0; i < 10; i++) {
     x += 1;
-}
-PROG
-  end
-
-  def test_goto
-    stmt = While.new(:loop1, Block.new([
-      While.new(:loop2, Block.new([
-        If.new(:want_out, Goto.new(:end_loop1))
-      ])),
-      Labeled.new(:end_loop1, EmptyStmt.new),
-    ]))
-    assert_equal <<PROG, translator.translate(stmt) + "\n"
-while (loop1) {
-    while (loop2) {
-        if (want_out) goto end_loop1;
-    }
-    end_loop1: ;
 }
 PROG
   end

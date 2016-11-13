@@ -415,12 +415,19 @@ module Chelsy
       "goto #{node.label}"
     end
 
+    # We need labeled statement to indent differently.
     def translate_case(node)
-      "case #{translate node.expr}: #{translate node.stmt}"
+      [
+        "case #{translate(node.expr)}",
+        translate(node.stmt),
+      ]
     end
 
     def translate_labeled(node)
-      "#{node.label}: #{translate node.stmt}"
+      [
+        node.label.to_s,
+        translate(node.stmt),
+      ]
     end
 
     def translate_return(node)
@@ -521,8 +528,9 @@ module Chelsy
 
     private
 
-    def indent
-      @indent_string * @indent_level
+    def indent(indent_level=nil)
+      indent_level = @indent_level if indent_level.nil?
+      @indent_string * indent_level
     end
 
     # Parenthesize if `node` has lower precedence than `parent` node.
@@ -612,16 +620,25 @@ module Chelsy
       @indent_level += 1
 
       lines = node.map do |item|
-        indent.tap do |src|
-          src << translate(item)
+        src = translate(item)
 
-          # terminate ';' if needed
-          src << ';' if should_terminate_with_semicolon(item)
+        if Array === src && src.size == 2
+          (label, stmt) = *src
+
+          src = "#{indent(@indent_level-1)}#{label}:\n"
+          src << "#{indent}#{stmt}"
+        else
+          src.insert 0, indent
         end
+
+        # terminate ';' if needed
+        src << ';' if should_terminate_with_semicolon(item)
+        src
       end
 
-      body = lines.join("\n")
       @indent_level -= 1
+
+      body = lines.join("\n")
 
       "{\n#{body}\n#{indent}}"
     end
