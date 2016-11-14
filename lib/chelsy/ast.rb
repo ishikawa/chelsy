@@ -225,6 +225,13 @@ module Chelsy
   module Syntax
   end
 
+  class IdentList < Element
+    include NodeList
+
+    private
+    def validate_node(node); Syntax::Ident.ensure(node) end
+  end
+
   class ParamList < Element
     include NodeList
 
@@ -1052,11 +1059,27 @@ module Chelsy
       def initialize(location, system: false, **rest)
         @location = location.to_s.dup
         @system = !!system
+
+        super **rest
       end
 
       # If `true`, this fragment forms `#include <...>`.
       # otherwise, this fragment forms `#include "..."`.
       def system?; @system end
+    end
+
+    # - `args` - [symbol]
+    # - `replacement` - string
+    class Define < Base
+      attr_reader :name, :params, :replacement
+
+      def initialize(name, params=nil, replacement, **rest)
+        @name = Syntax::Ident.ensure(name)
+        @params = IdentList.new(params) if params
+        @replacement = Syntax::Raw.ensure(replacement)
+
+        super **rest
+      end
     end
   end
 
@@ -1066,6 +1089,7 @@ module Chelsy
   module Syntax
     TopLevel = Any.new('TopLevel', [Declarative])
     Type = Any.new('TypeSpecifier', [Chelsy::Type::Base, :void])
+    Raw = Any.new('Raw', [String])
     Ident = Any.new('Identifier', [Symbol])
     Expr = Any.new('Expression', [Chelsy::Expr, Syntax::Ident])
     ExprOrType = Any.new('Expression-Or-Type', [Syntax::Expr, Syntax::Type])

@@ -43,6 +43,8 @@ module Chelsy
         node.to_s
       when Directive::Include
         translate_include(node)
+      when Directive::Define
+        translate_define(node)
       else
         raise ArgumentError, "Unrecognized AST fragment: #{node.inspect}"
       end
@@ -529,6 +531,21 @@ module Chelsy
         "#include <#{node.location}>"
       else
         %Q{#include "#{node.location}"}
+      end
+    end
+
+    def translate_define(node)
+      "#define #{node.name}".tap do |src|
+        if node.params
+          src << '('
+          src << node.params.map(&:to_s).join(", ")
+          src << ')'
+        end
+
+        unless node.replacement.empty?
+          src << ' '
+          src << node.replacement.to_s
+        end
       end
     end
 
