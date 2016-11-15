@@ -45,6 +45,14 @@ module Chelsy
         translate_include(node)
       when Directive::Define
         translate_define(node)
+      when Directive::If
+        translate_if_directive(node)
+      when Directive::ElseIf
+        translate_elif_directive(node)
+      when Directive::Else
+        translate_else_directive(node)
+      when Directive::EndIf
+        translate_endif_directive(node)
       else
         raise ArgumentError, "Unrecognized AST fragment: #{node.inspect}"
       end
@@ -548,6 +556,18 @@ module Chelsy
         end
       end
     end
+
+    def translate_if_directive(node)
+      "#if #{translate node.condition}"
+    end
+
+    def translate_elif_directive(node)
+      "#elif #{translate node.condition}"
+    end
+
+    def translate_else_directive(node); "#else" end
+
+    def translate_endif_directive(node); "#endif" end
 
     private
 

@@ -594,6 +594,23 @@ PROG
 PROG
   end
 
+  def test_define
+    doc = Document.new
+    doc.fragments << Directive::If.new(Operator::Equal.new(:VERSION, Constant::Int.new(1)))
+    doc.fragments << Directive::Define.new(:INCFILE, '"vers1.h"')
+    doc.fragments << Directive::ElseIf.new(Operator::Equal.new(:VERSION, Constant::Int.new(2)))
+    doc.fragments << Directive::Define.new(:INCFILE, '"vers2.h"')
+    doc.fragments << Directive::EndIf.new()
+
+    assert_equal <<PROG, translator.translate(doc)
+#if VERSION == 1
+#define INCFILE "vers1.h"
+#elif VERSION == 2
+#define INCFILE "vers2.h"
+#endif
+PROG
+  end
+
   # document
   def test_document
     # empty

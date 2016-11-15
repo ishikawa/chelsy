@@ -1068,7 +1068,7 @@ module Chelsy
       def system?; @system end
     end
 
-    # - `args` - [symbol]
+    # - `params` - [symbol]
     # - `replacement` - string
     class Define < Base
       attr_reader :name, :params, :replacement
@@ -1081,6 +1081,35 @@ module Chelsy
         super **rest
       end
     end
+
+    # `#if`
+    class If < Base
+      attr_reader :condition
+
+      def initialize(condition_expr, **rest)
+        @condition = Syntax::Expr.ensure(condition_expr)
+        super **rest
+      end
+    end
+
+    # `#elif`
+    class ElseIf < Base
+      attr_reader :condition
+
+      def initialize(condition_expr, **rest)
+        @condition = Syntax::Expr.ensure(condition_expr)
+        super **rest
+      end
+    end
+
+    # `#else`
+    class Else < Base
+    end
+
+    # `#endif`
+    class EndIf < Base
+    end
+
   end
 
 end
