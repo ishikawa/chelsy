@@ -1068,6 +1068,8 @@ module Chelsy
       def system?; @system end
     end
 
+    # `#define`
+    #
     # - `params` - [symbol]
     # - `replacement` - string
     class Define < Base
@@ -1078,6 +1080,16 @@ module Chelsy
         @params = IdentList.new(params) if params
         @replacement = Syntax::Raw.ensure(replacement)
 
+        super **rest
+      end
+    end
+
+    # `#undef`
+    class Undef < Base
+      attr_reader :name
+
+      def initialize(name, **rest)
+        @name = Syntax::Ident.ensure(name)
         super **rest
       end
     end

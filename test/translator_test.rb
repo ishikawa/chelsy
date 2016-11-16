@@ -611,6 +611,15 @@ PROG
 PROG
   end
 
+  def test_undef
+    doc = Document.new
+    doc.fragments << Directive::Undef.new(:INCFILE)
+
+    assert_equal <<PROG, translator.translate(doc)
+#undef INCFILE
+PROG
+  end
+
   # document
   def test_document
     # empty

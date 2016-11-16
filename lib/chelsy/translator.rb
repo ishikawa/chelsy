@@ -45,6 +45,8 @@ module Chelsy
         translate_include(node)
       when Directive::Define
         translate_define(node)
+      when Directive::Undef
+        translate_undef(node)
       when Directive::If
         translate_if_directive(node)
       when Directive::ElseIf
@@ -555,6 +557,10 @@ module Chelsy
           src << node.replacement.to_s
         end
       end
+    end
+
+    def translate_undef(node)
+      "#undef #{node.name}"
     end
 
     def translate_if_directive(node)
