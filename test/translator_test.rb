@@ -594,7 +594,7 @@ PROG
 PROG
   end
 
-  def test_define
+  def test_if_directive
     doc = Document.new
     doc.fragments << Directive::If.new(Operator::Equal.new(:VERSION, Constant::Int.new(1)))
     doc.fragments << Directive::Define.new(:INCFILE, '"vers1.h"')
@@ -608,6 +608,12 @@ PROG
 #elif VERSION == 2
 #define INCFILE "vers2.h"
 #endif
+PROG
+
+    doc = Document.new
+    doc.fragments << Directive::If.new(Operator::Defined.new(:VERSION))
+    assert_equal <<PROG, translator.translate(doc)
+#if defined VERSION
 PROG
   end
 

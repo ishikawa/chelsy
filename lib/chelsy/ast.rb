@@ -639,6 +639,15 @@ module Chelsy
       end
     end
 
+    # `defined` unary operator in conditional macro.
+    class Defined < Unary
+      def self.operator; :"defined" end
+
+      def initialize(operand, **rest)
+        super Syntax::Ident.ensure(operand), **rest
+      end
+    end
+
     # == 6.5.5 Multiplicative operators
 
     # Multiplication
@@ -773,6 +782,7 @@ module Chelsy
     class Comma < Binary
       def self.operator; :"," end
     end
+
   end
 
   module Operator
@@ -797,6 +807,7 @@ module Chelsy
         Dereference,
         Address,
         SizeOf,
+        Defined,
       ],
       [
         Mul, Div, Rem,

@@ -317,6 +317,8 @@ module Chelsy
         translate_postfix_operator(node)
       when Operator::Prefix
         translate_prefix_operator(node)
+      when Operator::Defined
+        translate_defined_operator(node)
       else
         raise NotImplementedError, "Unrecognized unary operator: #{node.inspect}"
       end
@@ -361,6 +363,11 @@ module Chelsy
     def translate_size_of(node)
       operand = translate(node.operand)
       "sizeof(#{operand})"
+    end
+
+    def translate_defined_operator(node)
+      operand = translate(node.operand)
+      "defined #{operand}"
     end
 
     def translate_binary_operator(node)
