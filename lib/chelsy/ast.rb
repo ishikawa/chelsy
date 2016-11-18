@@ -1133,6 +1133,20 @@ module Chelsy
     class EndIf < Base
     end
 
+    # `#line`
+    #
+    #     #line digits ["filename"]
+    #
+    class Line < Base
+      attr_reader :lineno, :filename
+
+      def initialize(lineno, filename=nil, **rest)
+        @lineno = Syntax::Int.ensure(lineno)
+        @filename = Syntax::Raw.ensure(filename) if filename
+
+        super **rest
+      end
+    end
   end
 
 end
@@ -1142,6 +1156,7 @@ module Chelsy
     TopLevel = Any.new('TopLevel', [Declarative])
     Type = Any.new('TypeSpecifier', [Chelsy::Type::Base, :void])
     Raw = Any.new('Raw', [String])
+    Int = Any.new('Raw', [::Integer])
     Ident = Any.new('Identifier', [Symbol])
     Expr = Any.new('Expression', [Chelsy::Expr, Syntax::Ident])
     ExprOrType = Any.new('Expression-Or-Type', [Syntax::Expr, Syntax::Type])

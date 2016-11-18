@@ -626,6 +626,17 @@ PROG
 PROG
   end
 
+  def test_line
+    doc = Document.new
+    doc.fragments << Directive::Line.new(14)
+    doc.fragments << Directive::Line.new(15, "copy.c")
+
+    assert_equal <<PROG, translator.translate(doc)
+#line 14
+#line 15 "copy.c"
+PROG
+  end
+
   # document
   def test_document
     # empty
