@@ -57,6 +57,8 @@ module Chelsy
         translate_endif_directive(node)
       when Directive::Line
         translate_line_directive(node)
+      when Directive::Pragma
+        translate_pragma_directive(node)
       else
         raise ArgumentError, "Unrecognized AST fragment: #{node.inspect}"
       end
@@ -588,6 +590,10 @@ module Chelsy
       "#line #{node.lineno}".tap do |src|
         src << " \"#{node.filename}\"" if node.filename
       end
+    end
+
+    def translate_pragma_directive(node)
+      "#pragma #{node.pragma}"
     end
 
     private

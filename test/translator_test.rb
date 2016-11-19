@@ -637,6 +637,17 @@ PROG
 PROG
   end
 
+  def test_pragma
+    doc = Document.new
+    doc.fragments << Directive::Pragma.new("GCC poison printf sprintf fprintf")
+    doc.fragments << Directive::StdcPragma.new(:FP_CONTRACT, :ON)
+
+    assert_equal <<PROG, translator.translate(doc)
+#pragma GCC poison printf sprintf fprintf
+#pragma STDC FP_CONTRACT ON
+PROG
+  end
+
   # document
   def test_document
     # empty

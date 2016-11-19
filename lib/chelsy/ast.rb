@@ -1147,6 +1147,33 @@ module Chelsy
         super **rest
       end
     end
+
+    # `#pragma`
+    class Pragma < Base
+      attr_reader :pragma
+
+      def initialize(pragma, **rest)
+        @pragma = Syntax::Raw.ensure(pragma)
+        super **rest
+      end
+    end
+
+    # `STDC` pragma
+    #
+    #     #pragma STDC FP_CONTRACT on-off-switch
+    #     #pragma STDC FENV_ACCESS on-off-switch
+    #     #pragma STDC CX_LIMITED_RANGE on-off-switch
+    class StdcPragma < Pragma
+      attr_reader :name, :state
+
+      def initialize(name, state, **rest)
+        @name = Syntax::StdcPragma.ensure(name)
+        @state = Syntax::StdcPragmaState.ensure(state)
+
+        super "STDC #{name} #{state}", **rest
+      end
+    end
+
   end
 
 end
@@ -1176,5 +1203,7 @@ module Chelsy
                     Syntax::Stmt,
                     Chelsy::Declarative])
     Declaration = Any.new('Declaration', [Chelsy::Declaration])
+    StdcPragma = Any.new('STDC Pragma', [:FP_CONTRACT, :FENV_ACCESS, :CX_LIMITED_RANGE])
+    StdcPragmaState = Any.new('STDC Pragma State', [:ON, :OFF, :DEFAULT])
   end
 end
