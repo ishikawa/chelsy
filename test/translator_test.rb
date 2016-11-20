@@ -648,6 +648,53 @@ PROG
 PROG
   end
 
+  def test_comment
+    # single line comment
+    f = Function.new(:foo, Type::Int.new, []) do |b|
+      b << Return.new(Constant::Int.new(0))
+    end
+
+    f.fragments << Comment::Single.new("comment")
+
+    assert_equal <<PROG, translator.translate(f) + "\n"
+// comment
+int foo() {
+    return 0;
+}
+PROG
+
+    # multi comment with single line
+    f = Function.new(:foo, Type::Int.new, []) do |b|
+      b << Return.new(Constant::Int.new(0))
+    end
+
+    f.fragments << Comment::Multi.new("Line 1")
+
+    assert_equal <<PROG, translator.translate(f) + "\n"
+/* Line 1 */
+int foo() {
+    return 0;
+}
+PROG
+
+    # multiline
+    f = Function.new(:foo, Type::Int.new, []) do |b|
+      b << Return.new(Constant::Int.new(0))
+    end
+
+    f.fragments << Comment::Multi.new("Line 1\nLine 2")
+
+    assert_equal <<PROG, translator.translate(f) + "\n"
+/*
+ * Line 1
+ * Line 2
+ */
+int foo() {
+    return 0;
+}
+PROG
+  end
+
   # document
   def test_document
     # empty

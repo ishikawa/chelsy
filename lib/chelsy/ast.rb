@@ -51,6 +51,32 @@ module Chelsy
   class Fragment < Node
   end
 
+  module Comment
+    class Base < Fragment
+    end
+
+    # `// ...`
+    class Single < Base
+      attr_reader :body
+
+      def initialize(body, **rest)
+        @body = body.dup
+        super **rest
+      end
+    end
+
+    # `/* ... */`
+    class Multi < Base
+      attr_reader :lines
+
+      def initialize(body, **rest)
+        @lines = body.split(/\n/)
+        super **rest
+      end
+    end
+
+  end
+
   module Syntax
   end
 

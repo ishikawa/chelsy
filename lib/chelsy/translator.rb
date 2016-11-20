@@ -41,6 +41,10 @@ module Chelsy
       case node
       when String
         node.to_s
+      when Comment::Multi
+        translate_comment_multi(node)
+      when Comment::Single
+        translate_comment_single(node)
       when Directive::Include
         translate_include(node)
       when Directive::Define
@@ -544,6 +548,27 @@ module Chelsy
     def translate_param(node)
       ty = coerce_func_ptr(node.type)
       translate_typed_name(ty, node.name)
+    end
+
+    # = Comment
+    def translate_comment_multi(node)
+      case node.lines.size
+      when 0
+        ""
+      when 1
+        "/* #{node.lines[0]} */"
+      else
+        src =
+          node
+            .lines
+            .map {|line| "#{indent} * #{line}"}
+            .join("\n")
+        "/*\n#{src}\n#{indent} */"
+      end
+    end
+
+    def translate_comment_single(node)
+      "// #{node.body}"
     end
 
     # = Directives
