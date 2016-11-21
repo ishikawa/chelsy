@@ -1,5 +1,7 @@
 # Chelsy
 
+[![Build Status](https://travis-ci.org/ishikawa/chelsy.svg?branch=master)](https://travis-ci.org/ishikawa/chelsy)
+
 TODO
 
 It is currently heavily under development. I'm just having some fun.
