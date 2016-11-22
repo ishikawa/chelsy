@@ -1,10 +1,17 @@
 module Chelsy; module Syntax
 
-  class Rule
+  class Constraint
     attr_reader :name
 
+    # Initialize instance. You must suply its `name` to debugging purpose.
+    #
+    # @param name [String] the name of this constraint
     def initialize(name)
       @name = name.dup
+    end
+
+    def ===(node)
+      accept?(node)
     end
 
     def accept?(node)
@@ -20,7 +27,7 @@ module Chelsy; module Syntax
     end
   end
 
-  class Any < Rule
+  class Any < Constraint
     def initialize(name, constraints)
       @constraints = constraints.dup
       super name
@@ -28,12 +35,7 @@ module Chelsy; module Syntax
 
     def accept?(node)
       @constraints.any? do |constraint|
-        case constraint
-        when Chelsy::Syntax::Rule
-          constraint.accept?(node)
-        else
-          constraint === node
-        end
+        constraint === node
       end
     end
 
