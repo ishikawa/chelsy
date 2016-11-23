@@ -1047,10 +1047,12 @@ module Chelsy
       @name = Syntax::Ident.ensure(name)
       @type = Syntax::Type.ensure(type)
       @init = case init
+              when nil
+                nil
               when Enumerable
                 InitializerList.new(init)
               else
-                init
+                Syntax::Expr.ensure(init)
               end
 
       super(**rest)
