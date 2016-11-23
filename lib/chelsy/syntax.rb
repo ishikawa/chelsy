@@ -34,8 +34,14 @@ module Chelsy; module Syntax
     end
 
     def accept?(node)
-      @constraints.any? do |constraint|
-        constraint === node
+      # Most C program uses C preprocessor, so we accept any raw string representation.
+      case node
+      when String
+        true
+      else
+        @constraints.any? do |constraint|
+          constraint === node
+        end
       end
     end
 
