@@ -70,7 +70,12 @@ module Chelsy
       attr_reader :lines
 
       def initialize(body, **rest)
-        @lines = body.split(/\n/)
+        @lines = case body
+                 when String
+                   body.split(/\n/)
+                 else
+                   body.to_a
+                 end
         super **rest
       end
     end

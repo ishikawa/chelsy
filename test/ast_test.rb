@@ -46,6 +46,14 @@ class Chelsy::ASTTest < Minitest::Test
     assert ret.expr
   end
 
+  def test_comment
+    c = Comment::Multi.new("A\nB")
+    assert ["A", "B"], c.lines
+
+    c = Comment::Multi.new(['A', 'B'])
+    assert ["A", "B"], c.lines
+  end
+
   # == Fragment
   def test_expr_with_fragment
     node = Constant::Int.new(1)
