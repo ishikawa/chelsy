@@ -111,7 +111,7 @@ module Chelsy
     attr_reader :storage
 
     def initialize(storage: nil, **rest)
-      @storage = Syntax::Storage.ensure(storage)
+      @storage = Syntax::Storage.ensure(storage) if storage
 
       super(**rest)
     end
@@ -1214,12 +1214,12 @@ module Chelsy
     TopLevel = Any.new('TopLevel', [Declarative])
     Type = Any.new('TypeSpecifier', [Chelsy::Type::Base, :void])
     Raw = Any.new('Raw', [String])
-    Int = Any.new('Raw', [::Integer])
+    Int = Any.new('Int', [::Integer])
     Ident = Any.new('Identifier', [Symbol])
     Expr = Any.new('Expression', [Chelsy::Expr, Syntax::Ident])
     ExprOrType = Any.new('Expression-Or-Type', [Syntax::Expr, Syntax::Type])
     Fragment = Any.new('Fragment', [Fragment, String])
-    Storage = Any.new('Storage-class specifiers', [:typedef, :extern, :static, nil])
+    Storage = Any.new('Storage-class specifiers', [:typedef, :extern, :static])
     Param = Any.new('Parameter', [Chelsy::Param, :void, :"..."])
     ProtoParam = Any.new('Prototype Parameter', [Syntax::Param, Symbol, Chelsy::Type::Base])
     ArraySize = Any.new('ArraySize', [Syntax::Expr])
