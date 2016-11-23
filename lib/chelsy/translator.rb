@@ -5,9 +5,9 @@ module Chelsy
 
     DEFAULT_INDENT_STRING = '    '.freeze
 
-    def initialize()
-      @indent_string = DEFAULT_INDENT_STRING
-      @indent_level = 0
+    def initialize(indent_string: DEFAULT_INDENT_STRING, indent_level: 0)
+      @indent_string = indent_string
+      @indent_level = indent_level
     end
 
     def translate(node)
