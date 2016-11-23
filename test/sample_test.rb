@@ -7,6 +7,10 @@ class Chelsy::SampleTest < Minitest::Test
     validate_generate_sample 'hello_chelsy'
   end
 
+  def test_temperature
+    validate_generate_sample 'temperature'
+  end
+
   private
 
   def validate_generate_sample(name)

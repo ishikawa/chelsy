@@ -13,6 +13,5 @@ int main(int argc, const char **argv) {
     int celsius = 5 * (fahr - 32) / 9;
     printf("%d\t%d\n", fahr, celsius);
   }
-
   return 0;
 }
