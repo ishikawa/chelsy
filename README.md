@@ -1,10 +1,18 @@
 # Chelsy
 
+[![API References](https://img.shields.io/badge/doc-api-blue.svg)](http://www.rubydoc.info/gems/chelsy)
 [![Build Status](https://travis-ci.org/ishikawa/chelsy.svg?branch=master)](https://travis-ci.org/ishikawa/chelsy)
+[![Gem](https://img.shields.io/gem/v/chelsy.svg)](https://rubygems.org/gems/chelsy)
 
-TODO
+> C code generator written in Ruby
 
-It is currently heavily under development. I'm just having some fun.
+**Chelsy** is C code generator library written in Ruby. You can construct AST objects and then transform it to C code.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [License](#license)
 
 ## Installation
 
@@ -24,13 +32,35 @@ Or install it yourself as:
 
 ## Usage
 
-TODO
+```ruby
+require 'chelsy'
 
-## Development
+include Chelsy
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+doc = Document.new
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+doc.fragments << Directive::Include.new("stdio.h", system: true)
+
+doc << Function.new(:main, Type::Int.new, [:void]) do |b|
+  b << Operator::Call.new(:printf, [Constant::String.new("Hello, Chelsy!\n")])
+  b << Return.new(Constant::Int.new(0))
+end
+
+puts Translator.new.translate(doc)
+```
+
+This script generates famous "Hello, World!" C program.
+
+```c
+#include <stdio.h>
+
+int main(void) {
+    printf("Hello, Chelsy!\n");
+    return 0;
+}
+```
+
+See [sample](https://github.com/ishikawa/chelsy/tree/master/sample) directory to find more samples.
 
 ## License
 
