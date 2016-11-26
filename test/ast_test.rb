@@ -38,6 +38,49 @@ class Chelsy::ASTTest < Minitest::Test
     assert_nil s.members
   end
 
+  def test_while_stmt
+    assert_raises(ArgumentError) do
+      While.new(:loop1)
+    end
+
+    # body statement
+    stmt = While.new(:loop1, Operator::PostfixIncrement.new(:x))
+    assert_instance_of Operator::PostfixIncrement, stmt.body
+
+    # Use code block
+    stmt = While.new(:loop1) do |b|
+      b << Operator::PostfixIncrement.new(:x)
+    end
+    assert 1 == stmt.body.size
+    assert_instance_of Operator::PostfixIncrement, stmt.body[0]
+  end
+
+  def test_do_while_stmt
+    assert_raises(ArgumentError) do
+      DoWhile.new(:loop1)
+    end
+
+    # body statement
+    stmt = DoWhile.new(:loop1, Operator::PostfixIncrement.new(:x))
+    assert_instance_of Operator::PostfixIncrement, stmt.body
+
+    # Use code block
+    stmt = DoWhile.new(:loop1) do |b|
+      b << Operator::PostfixIncrement.new(:x)
+    end
+    assert 1 == stmt.body.size
+    assert_instance_of Operator::PostfixIncrement, stmt.body[0]
+  end
+
+  def test_for_stmt
+    assert_raises(ArgumentError) do
+      For.new()
+    end
+
+    stmt = For.new(nil, nil, nil, EmptyStmt.new)
+    assert_instance_of EmptyStmt, stmt.body
+  end
+
   def test_return
     ret = Return.new
     assert_nil ret.expr

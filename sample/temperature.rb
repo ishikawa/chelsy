@@ -23,16 +23,15 @@ doc << Function.new(:main,
   cond = Operator::LessThanOrEqual.new(:fahr, 'UPPER')
   step = Operator::AssignAdd.new(:fahr, 'STEP')
 
-  stmt = Block.new.tap do |b|
+  b << For.new(init, cond, step) do |body|
     celsius = Operator::Sub.new(:fahr, Constant::Int.new(32))
     celsius = Operator::Mul.new(Constant::Int.new(5), celsius)
     celsius = Operator::Div.new(celsius, Constant::Int.new(9))
 
-    b << Declaration.new(:celsius, Type::Int.new, celsius)
-    b << Operator::Call.new(:printf, [Constant::String.new("%d\t%d\n"), :fahr, :celsius])
+    body << Declaration.new(:celsius, Type::Int.new, celsius)
+    body << Operator::Call.new(:printf, [Constant::String.new("%d\t%d\n"), :fahr, :celsius])
   end
 
-  b << For.new(init, cond, step, stmt)
   b << Return.new(Constant::Int.new(0))
 end
 

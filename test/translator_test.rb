@@ -415,16 +415,17 @@ PROG
   end
 
   def test_for_stmt
-    stmt = For.new(Block.new([
-      Break.new,
-      Continue.new,
-    ]))
+    stmt = For.new do |b|
+      b << Break.new
+      b << Continue.new
+    end
     assert_equal <<PROG, translator.translate(stmt) + "\n"
 for (;;) {
     break;
     continue;
 }
 PROG
+
     stmt = For.new(
       Declaration.new(:i, Type::Int.new, Constant::Int.new(0)),
       Operator::LessThan.new(:i, Constant::Int.new(10)),

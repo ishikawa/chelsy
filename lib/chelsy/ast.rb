@@ -978,38 +978,67 @@ module Chelsy
   end
 
   # == 6.8.5 Iteration statements
-  class While < Stmt
+
+  # @abstract Subclass to implement a custom iteration class.
+  class Iteration < Stmt
     attr_reader :condition, :body
 
-    def initialize(condition_expr, body_stmt, **rest)
-      @condition = Syntax::Expr.ensure(condition_expr)
-      @body = Syntax::Stmt::ensure(body_stmt)
-
-      super **rest
-    end
-  end
-
-  class DoWhile < Stmt
-    attr_reader :condition, :body
-
-    def initialize(condition_expr, body_stmt, **rest)
-      @condition = Syntax::Expr.ensure(condition_expr)
-      @body = Syntax::Stmt::ensure(body_stmt)
-
-      super **rest
-    end
-  end
-
-  class For < Stmt
-    attr_reader :init, :condition, :loop, :body
-
-    def initialize(init_stmt=nil, condition_expr=nil, loop_expr=nil, body_stmt, **rest)
-      @init = Syntax::BlockItem::ensure(init_stmt) if init_stmt
+    # Initialize iteration statement with its condition and iteration body statement.
+    # You can pass an optional code block which takes {Chelsy::Block} instance can be
+    # used to construct iteration body statements.
+    #
+    # @param condition_expr an expression which express condition
+    # @param body_stmt iteration body statement
+    # @yield [Chelsy::Block] If given, this method yields {Chelsy::Block} instance
+    # @raise [ArgumentError] Given neither `body_stmt` nor code block
+    def initialize(condition_expr=nil, body_stmt=nil, **rest)
       @condition = Syntax::Expr.ensure(condition_expr) if condition_expr
-      @loop = Syntax::Expr.ensure(loop_expr) if loop_expr
-      @body = Syntax::Stmt::ensure(body_stmt)
+
+      if block_given?
+        @body = Block.new
+        yield @body
+      elsif body_stmt
+        @body = Syntax::Stmt.ensure(body_stmt)
+      else
+        raise ArgumentError, "missing body statement"
+      end
 
       super **rest
+    end
+  end
+
+  # This class represents `while` iteration statement.
+  class While < Iteration
+    # (see Chelsy::Iteration#initialize)
+    # @raise [ArgumentError] `condition_expr` is nil
+    def initialize(condition_expr, body_stmt=nil, **rest)
+      raise ArgumentError, "missing condition expr" unless condition_expr
+      super condition_expr, body_stmt, **rest
+    end
+  end
+
+  # This class represents `do ... while (...)` iteration statement.
+  class DoWhile < Iteration
+    # (see Chelsy::Iteration#initialize)
+    # @raise [ArgumentError] `condition_expr` is nil
+    def initialize(condition_expr, body_stmt=nil, **rest)
+      raise ArgumentError, "missing condition expr" unless condition_expr
+      super condition_expr, body_stmt, **rest
+    end
+  end
+
+  # This class represents `for` iteration statement.
+  class For < Iteration
+    attr_reader :init, :loop
+
+    # (see Chelsy::Iteration#initialize)
+    # @param init_stmt initialization statement
+    # @param loop_expr loop expression is performed each iteration
+    def initialize(init_stmt=nil, condition_expr=nil, loop_expr=nil, body_stmt=nil, **rest)
+      @init = Syntax::BlockItem::ensure(init_stmt) if init_stmt
+      @loop = Syntax::Expr.ensure(loop_expr) if loop_expr
+
+      super condition_expr, body_stmt, **rest
     end
   end
 
