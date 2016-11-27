@@ -299,11 +299,6 @@ PROG
     assert_equal '', translator.translate(stmt)
   end
 
-  def test_expr_stmt
-    stmt = ExprStmt.new(Constant::Int.new(1))
-    assert_equal '1', translator.translate(stmt)
-  end
-
   def test_if_stmt
     stmt = If.new(
       Operator::LessThan.new(:x, Constant::Int.new(0)),

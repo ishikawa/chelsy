@@ -124,12 +124,6 @@ class Chelsy::ASTTest < Minitest::Test
     end
   end
 
-  def test_expr_stmt
-    assert_raises(ArgumentError) do
-      ExprStmt.new(EmptyStmt.new)
-    end
-  end
-
   def test_function_param
     assert_raises(ArgumentError) do
       Param.new(EmptyStmt.new, Type::Int.new)

@@ -93,8 +93,6 @@ module Chelsy
       # Statements
       when EmptyStmt
         translate_empty_stmt(node)
-      when ExprStmt
-        translate_expr_stmt(node)
       when If
         translate_if(node)
       when Switch

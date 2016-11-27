@@ -922,16 +922,6 @@ module Chelsy
   class EmptyStmt < Stmt
   end
 
-  class ExprStmt < Stmt
-    attr_reader :expr
-
-    def initialize(expr, **rest)
-      @expr = Syntax::Expr.ensure(expr)
-
-      super(**rest)
-    end
-  end
-
   # == 6.8.2 Compound statement
 
   class Block < Stmt
@@ -1259,7 +1249,7 @@ module Chelsy
     EnumMember = Any.new('EnumMember', [Chelsy::EnumMember, Symbol])
     Initializer = Any.new('Initializer', [Syntax::Expr, Chelsy::Initializer, Chelsy::InitializerList])
     Stmt = Any.new('Statement', [
-                    Syntax::Expr, # Treats Expr as ExprStmt
+                    Syntax::Expr, # Treats Expr as Expression Statement
                     Chelsy::Stmt])
     BlockItem   = Any.new('BlockItem', [
                     Syntax::Stmt,
