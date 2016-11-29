@@ -10,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.email         = ['takanori.ishikawa@gmail.com']
 
   spec.homepage      = 'https://github.com/ishikawa/chelsy'
-  spec.summary       = 'C code generator written in Ruby'
-  spec.description   = 'C code generator written in Ruby'
+  spec.summary       = 'C code generator library written in Ruby'
+  spec.description   = 'C code generator library written in Ruby'
   spec.license       = 'MIT'
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|

@@ -4,9 +4,11 @@
 [![Build Status](https://travis-ci.org/ishikawa/chelsy.svg?branch=master)](https://travis-ci.org/ishikawa/chelsy)
 [![Gem](https://img.shields.io/gem/v/chelsy.svg)](https://rubygems.org/gems/chelsy)
 
-> C code generator written in Ruby
+> C code generator library written in Ruby
 
 **Chelsy** is C code generator library written in Ruby. You can construct AST objects and then transform it to C code.
+
+**This library heavily under development. Anything may change at any time. The public API should not be considered stable.**
 
 ## Table of Contents
 
