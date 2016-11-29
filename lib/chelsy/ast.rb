@@ -6,6 +6,21 @@ module Chelsy
   class Node
     def initialize(**opts)
     end
+
+    protected
+
+    # Returns an object as an immutable string.
+    #
+    # @param [Object] obj an Object
+    # @return [String] The string representation of `obj`. It's frozen (unmodifiable).
+    def immutable_stringify(obj)
+      str = obj.to_s
+      if str.frozen?
+        str
+      else
+        str.dup.freeze
+      end
+    end
   end
 
   # The class must provide a method validate_node`
@@ -104,6 +119,25 @@ module Chelsy
       @post_fragments = FragmentList.new
 
       super(**rest)
+    end
+  end
+
+  # This node represents arbitrary C code snippet. It can be an decsendant of any node.
+  # However it is used mainly in macro definition.
+  class Raw < Element
+    # @!attribute [r] code
+    #   @return [String] C code snippet
+    attr_reader :code
+
+    # Initialize instance.
+    # @param [#to_s] code C code snippet
+    def initialize(code, **rest)
+      @code = immutable_stringify(code)
+      super **rest
+    end
+
+    def to_s
+      @code
     end
   end
 
@@ -1120,7 +1154,7 @@ module Chelsy
       attr_reader :location
 
       def initialize(location, system: false, **rest)
-        @location = location.to_s.dup
+        @location = immutable_stringify(location)
         @system = !!system
 
         super **rest
@@ -1141,7 +1175,7 @@ module Chelsy
       def initialize(name, params=nil, replacement, **rest)
         @name = Syntax::Ident.ensure(name)
         @params = IdentList.new(params) if params
-        @replacement = Syntax::Raw.ensure(replacement)
+        @replacement = Syntax::MacroDefinition.ensure(replacement)
 
         super **rest
       end
@@ -1194,7 +1228,7 @@ module Chelsy
 
       def initialize(lineno, filename=nil, **rest)
         @lineno = Syntax::Int.ensure(lineno)
-        @filename = Syntax::Raw.ensure(filename) if filename
+        @filename = immutable_stringify(filename) if filename
 
         super **rest
       end
@@ -1205,7 +1239,7 @@ module Chelsy
       attr_reader :pragma
 
       def initialize(pragma, **rest)
-        @pragma = Syntax::Raw.ensure(pragma)
+        @pragma = immutable_stringify(pragma)
         super **rest
       end
     end
@@ -1234,7 +1268,6 @@ module Chelsy
   module Syntax
     TopLevel = Any.new('TopLevel', [Declarative])
     Type = Any.new('TypeSpecifier', [Chelsy::Type::Base, :void])
-    Raw = Any.new('Raw', [String])
     Int = Any.new('Int', [::Integer])
     Ident = Any.new('Identifier', [Symbol])
     Expr = Any.new('Expression', [Chelsy::Expr, Syntax::Ident])
@@ -1257,5 +1290,8 @@ module Chelsy
     Declaration = Any.new('Declaration', [Chelsy::Declaration])
     StdcPragma = Any.new('STDC Pragma', [:FP_CONTRACT, :FENV_ACCESS, :CX_LIMITED_RANGE])
     StdcPragmaState = Any.new('STDC Pragma State', [:ON, :OFF, :DEFAULT])
+    MacroDefinition = Any.new('Raw', [
+                        Chelsy::Raw,
+                        Syntax::BlockItem])
   end
 end

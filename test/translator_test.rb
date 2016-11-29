@@ -577,10 +577,10 @@ PROG
 
   def test_define
     doc = Document.new
-    doc.fragments << Directive::Define.new(:hash_hash, '# ## #')
-    doc.fragments << Directive::Define.new(:mkstr, [:a], '# a')
-    doc.fragments << Directive::Define.new(:in_between, [:a], 'mkstr(a)')
-    doc.fragments << Directive::Define.new(:join, [:c, :d], 'in_between(c hash_hash d)')
+    doc.fragments << Directive::Define.new(:hash_hash, Raw.new('# ## #'))
+    doc.fragments << Directive::Define.new(:mkstr, [:a], Raw.new('# a'))
+    doc.fragments << Directive::Define.new(:in_between, [:a], Raw.new('mkstr(a)'))
+    doc.fragments << Directive::Define.new(:join, [:c, :d], Raw.new('in_between(c hash_hash d)'))
 
     assert_equal <<PROG, translator.translate(doc)
 #define hash_hash # ## #
@@ -593,9 +593,9 @@ PROG
   def test_if_directive
     doc = Document.new
     doc.fragments << Directive::If.new(Operator::Equal.new(:VERSION, Constant::Int.new(1)))
-    doc.fragments << Directive::Define.new(:INCFILE, '"vers1.h"')
+    doc.fragments << Directive::Define.new(:INCFILE, Constant::String.new("vers1.h"))
     doc.fragments << Directive::ElseIf.new(Operator::Equal.new(:VERSION, Constant::Int.new(2)))
-    doc.fragments << Directive::Define.new(:INCFILE, '"vers2.h"')
+    doc.fragments << Directive::Define.new(:INCFILE, Constant::String.new("vers2.h"))
     doc.fragments << Directive::EndIf.new()
 
     assert_equal <<PROG, translator.translate(doc)

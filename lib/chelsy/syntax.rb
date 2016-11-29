@@ -34,9 +34,9 @@ module Chelsy; module Syntax
     end
 
     def accept?(node)
-      # Most C program uses C preprocessor, so we accept any raw string representation.
+      # Most C program uses C preprocessor, so we must accept any C code snippet.
       case node
-      when String
+      when Chelsy::Raw
         true
       else
         @constraints.any? do |constraint|

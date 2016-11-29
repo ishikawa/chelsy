@@ -70,6 +70,9 @@ module Chelsy
 
     def translate_element(node)
       case node
+      when Raw
+        node.code
+
       # Document
       when Document
         translate_document(node)
@@ -586,9 +589,10 @@ module Chelsy
           src << ')'
         end
 
-        unless node.replacement.empty?
+        replacement = translate(node.replacement)
+        unless replacement.empty?
           src << ' '
-          src << node.replacement.to_s
+          src << replacement
         end
       end
     end
@@ -611,12 +615,12 @@ module Chelsy
 
     def translate_line_directive(node)
       "#line #{node.lineno}".tap do |src|
-        src << " \"#{node.filename}\"" if node.filename
+        src << " \"#{translate node.filename}\"" if node.filename
       end
     end
 
     def translate_pragma_directive(node)
-      "#pragma #{node.pragma}"
+      "#pragma #{translate node.pragma}"
     end
 
     private
