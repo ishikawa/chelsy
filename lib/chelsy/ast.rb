@@ -1145,6 +1145,27 @@ module Chelsy
     end
   end
 
+  # AST node represents a macro invocation with or without arguments.
+  class Macro < Expr
+    attr_reader :name, :args
+
+    # @!attribute [r] name
+    #   @return [Symbol] Macro name
+    # @!attribute [r] args
+    #   @return [Enumerable] Arguments
+
+    # initialize instance.
+    #
+    # @param [Symbol] name Macro name
+    # @param [Enumerable] args Arguments. `nil` if no arguments supplied.
+    def initialize(name, args=nil, **rest)
+      @name = Syntax::Ident.ensure(name)
+      @args = args.map {|a| Syntax::Expr.ensure(a) } if args
+
+      super **rest
+    end
+  end
+
   # = 6.10 Preprocessing directives
   module Directive
     class Base < Fragment

@@ -292,6 +292,17 @@ PROG
     assert_equal '!!b ? (x & 0x7) : x', translator.translate(node)
   end
 
+  def test_macro
+    node = Macro.new(:F, [Constant::Int.new(1), Constant::Int.new(2)])
+    assert_equal 'F(1, 2)', translator.translate(node)
+
+    node = Macro.new(:in_between, [Raw.new('c hash_hash d')])
+    assert_equal 'in_between(c hash_hash d)', translator.translate(node)
+
+    node = Macro.new(:UPPER)
+    assert_equal 'UPPER', translator.translate(node)
+  end
+
   # = Statements and blocks
 
   def test_null_stmt

@@ -92,6 +92,8 @@ module Chelsy
         translate_binary_operator(node)
       when Operator::Conditional
         translate_ternary_conditional(node)
+      when Macro
+        translate_macro(node)
 
       # Statements
       when EmptyStmt
@@ -404,6 +406,18 @@ module Chelsy
       else_expr = expr(node.else, node)
 
       "#{condition_expr} ? #{then_expr} : #{else_expr}"
+    end
+
+    def translate_macro(node)
+      if node.args.nil?
+        node.name.to_s
+      else
+        node.name.to_s.tap do |src|
+          src << '('
+          src << node.args.map(&method(:translate)).join(', ')
+          src << ')'
+        end
+      end
     end
 
     # = Statements
