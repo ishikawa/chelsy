@@ -628,7 +628,7 @@ module Chelsy
     def translate_endif_directive(node); "#endif" end
 
     def translate_line_directive(node)
-      "#line #{node.lineno}".tap do |src|
+      "#line #{translate node.lineno}".tap do |src|
         src << " \"#{translate node.filename}\"" if node.filename
       end
     end

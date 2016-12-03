@@ -733,4 +733,29 @@ PROG
 
   end
 
+  ## Coerces Ruby objects to Node objects
+
+  def test_coerce_integer
+    # expression
+    expr = Operator::Add.new(:x, 1)
+    assert_equal 'x + 1', translator.translate(expr)
+
+    # bit-field
+    ty = Type::Struct.new(:s, [
+        BitField.new(3, Declaration.new(:b1, Type::Char.new(unsigned: true))),
+      ])
+    assert_equal <<PROG, translator.translate(ty) + "\n"
+struct s {
+    unsigned char b1 : 3;
+}
+PROG
+  end
+
+  def test_coerce_string
+    # declaration
+    d = Declaration.new(:greeting, Type::Pointer.new(Type::Char.new), "Hi")
+
+    assert_equal 'char *greeting = "Hi"', translator.translate(d)
+  end
+
 end

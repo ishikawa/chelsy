@@ -523,7 +523,7 @@ module Chelsy
       attr_reader :value
 
       def initialize(str, wide: false, **rest)
-        @value = str.dup.freeze
+        @value = immutable_stringify(str)
         @wide = !!wide
 
         super(**rest)
@@ -1248,7 +1248,7 @@ module Chelsy
       attr_reader :lineno, :filename
 
       def initialize(lineno, filename=nil, **rest)
-        @lineno = Syntax::Int.ensure(lineno)
+        @lineno = Syntax::Constant::Int.ensure(lineno)
         @filename = immutable_stringify(filename) if filename
 
         super **rest
@@ -1287,18 +1287,36 @@ end
 
 module Chelsy
   module Syntax
+
+    module Constant
+      Int = Coercer.new(Chelsy::Constant::Int) do |value|
+        Chelsy::Constant::Int.new(value) if ::Integer === value
+      end
+
+      String = Coercer.new(Chelsy::Constant::String) do |value|
+        Chelsy::Constant::String.new(value) if ::String === value
+      end
+    end
+
     TopLevel = Any.new('TopLevel', [Declarative])
     Type = Any.new('TypeSpecifier', [Chelsy::Type::Base, :void])
-    Int = Any.new('Int', [::Integer])
     Ident = Any.new('Identifier', [Symbol])
-    Expr = Any.new('Expression', [Chelsy::Expr, Syntax::Ident])
+    Expr = Any.new('Expression', [
+      Chelsy::Expr,
+      Syntax::Ident,
+      Syntax::Constant::Int,
+      Syntax::Constant::String,
+    ])
     ExprOrType = Any.new('Expression-Or-Type', [Syntax::Expr, Syntax::Type])
     Fragment = Any.new('Fragment', [Fragment, String])
     Storage = Any.new('Storage-class specifiers', [:typedef, :extern, :static])
     Param = Any.new('Parameter', [Chelsy::Param, :void, :"..."])
     ProtoParam = Any.new('Prototype Parameter', [Syntax::Param, Symbol, Chelsy::Type::Base])
     ArraySize = Any.new('ArraySize', [Syntax::Expr])
-    BitField = Any.new('BitField', [Chelsy::Constant::Integral])
+    BitField = Any.new('BitField', [
+      Chelsy::Constant::Integral,
+      Syntax::Constant::Int,
+    ])
     StructOrUnionMember = Any.new('StructOrUnionMember', [Chelsy::Declaration, Chelsy::BitField])
     EnumMember = Any.new('EnumMember', [Chelsy::EnumMember, Symbol])
     Initializer = Any.new('Initializer', [Syntax::Expr, Chelsy::Initializer, Chelsy::InitializerList])
