@@ -758,4 +758,13 @@ PROG
     assert_equal 'char *greeting = "Hi"', translator.translate(d)
   end
 
+  def test_coerce_function_param
+    f = Type::Function.new(Type::Int.new, [
+          [:x, Type::Int.new],
+          [:y, Type::Int.new],
+        ])
+    d = Declaration.new(:apfi, Type::Array.new(f, 3))
+    assert_equal 'int (*apfi[3])(int x, int y)', translator.translate(d)
+  end
+
 end

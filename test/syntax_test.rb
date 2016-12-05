@@ -25,9 +25,9 @@ class Chelsy::Syntax::ExprTest < Chelsy::SyntaxTest
 
 end
 
-class Chelsy::Syntax::Constant::IntTest < Chelsy::SyntaxTest
+class Chelsy::Syntax::Coercers::IntTest < Chelsy::SyntaxTest
   def test_accept
-    coercer = Syntax::Constant::Int
+    coercer = Syntax::Coercers::Int
 
     refute coercer.accept?(nil)
     refute coercer.accept?(1)
@@ -35,7 +35,7 @@ class Chelsy::Syntax::Constant::IntTest < Chelsy::SyntaxTest
   end
 
   def test_coerce
-    coercer = Syntax::Constant::Int
+    coercer = Syntax::Coercers::Int
 
     refute coercer.coerce(nil)
     refute coercer.coerce("")

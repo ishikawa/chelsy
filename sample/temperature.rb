@@ -16,8 +16,8 @@ doc.fragments << Directive::Define.new(:STEP,  20)
 
 doc << Function.new(:main,
                     Type::Int.new, [
-                      Param.new(:argc, Type::Int.new),
-                      Param.new(:argv, Type::Pointer.new(Type::Pointer.new(Type::Char.new(const: true)))),
+                      [:argc, Type::Int.new],
+                      [:argv, Type::Pointer.new(Type::Pointer.new(Type::Char.new(const: true)))],
                     ]) do |b|
   init = Declaration.new(:fahr, Type::Int.new, :LOWER)
   cond = Operator::LessThanOrEqual.new(:fahr, :UPPER)

@@ -1248,7 +1248,7 @@ module Chelsy
       attr_reader :lineno, :filename
 
       def initialize(lineno, filename=nil, **rest)
-        @lineno = Syntax::Constant::Int.ensure(lineno)
+        @lineno = Syntax::Coercers::Int.ensure(lineno)
         @filename = immutable_stringify(filename) if filename
 
         super **rest
@@ -1288,13 +1288,17 @@ end
 module Chelsy
   module Syntax
 
-    module Constant
-      Int = Coercer.new(Chelsy::Constant::Int) do |value|
-        Chelsy::Constant::Int.new(value) if ::Integer === value
+    module Coercers
+      Int = Coercer.new(Constant::Int) do |value|
+        Constant::Int.new(value) if ::Integer === value
       end
 
-      String = Coercer.new(Chelsy::Constant::String) do |value|
-        Chelsy::Constant::String.new(value) if ::String === value
+      String = Coercer.new(Constant::String) do |value|
+        Constant::String.new(value) if ::String === value
+      end
+
+      Param = Coercer.new(Chelsy::Param) do |value|
+        Chelsy::Param.new(*value) if ::Array === value
       end
     end
 
@@ -1304,18 +1308,18 @@ module Chelsy
     Expr = Any.new('Expression', [
       Chelsy::Expr,
       Syntax::Ident,
-      Syntax::Constant::Int,
-      Syntax::Constant::String,
+      Coercers::Int,
+      Coercers::String,
     ])
     ExprOrType = Any.new('Expression-Or-Type', [Syntax::Expr, Syntax::Type])
     Fragment = Any.new('Fragment', [Fragment, String])
     Storage = Any.new('Storage-class specifiers', [:typedef, :extern, :static])
-    Param = Any.new('Parameter', [Chelsy::Param, :void, :"..."])
+    Param = Any.new('Parameter', [Syntax::Coercers::Param, :void, :"..."])
     ProtoParam = Any.new('Prototype Parameter', [Syntax::Param, Symbol, Chelsy::Type::Base])
     ArraySize = Any.new('ArraySize', [Syntax::Expr])
     BitField = Any.new('BitField', [
       Chelsy::Constant::Integral,
-      Syntax::Constant::Int,
+      Coercers::Int,
     ])
     StructOrUnionMember = Any.new('StructOrUnionMember', [Chelsy::Declaration, Chelsy::BitField])
     EnumMember = Any.new('EnumMember', [Chelsy::EnumMember, Symbol])
