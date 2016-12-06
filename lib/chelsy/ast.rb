@@ -97,9 +97,6 @@ module Chelsy
 
   end
 
-  module Syntax
-  end
-
   class FragmentList < Node
     include NodeList
 
