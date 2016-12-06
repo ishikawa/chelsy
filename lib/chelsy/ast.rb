@@ -3,23 +3,23 @@ require "forwardable"
 
 module Chelsy
 
+  # Returns an object as an immutable string.
+  #
+  # @param [Object] obj an Object
+  # @return [String] The string representation of `obj`. It's frozen (unmodifiable).
+  def immutable_stringify(obj)
+    str = obj.to_s
+    if str.frozen?
+      str
+    else
+      str.dup.freeze
+    end
+  end
+
+  module_function :immutable_stringify
+
   class Node
     def initialize(**opts)
-    end
-
-    protected
-
-    # Returns an object as an immutable string.
-    #
-    # @param [Object] obj an Object
-    # @return [String] The string representation of `obj`. It's frozen (unmodifiable).
-    def immutable_stringify(obj)
-      str = obj.to_s
-      if str.frozen?
-        str
-      else
-        str.dup.freeze
-      end
     end
   end
 
@@ -129,7 +129,7 @@ module Chelsy
     # Initialize instance.
     # @param [#to_s] code C code snippet
     def initialize(code, **rest)
-      @code = immutable_stringify(code)
+      @code = Chelsy.immutable_stringify(code)
       super **rest
     end
 
@@ -520,7 +520,7 @@ module Chelsy
       attr_reader :value
 
       def initialize(str, wide: false, **rest)
-        @value = immutable_stringify(str)
+        @value = Chelsy.immutable_stringify(str)
         @wide = !!wide
 
         super(**rest)
@@ -1172,7 +1172,7 @@ module Chelsy
       attr_reader :location
 
       def initialize(location, system: false, **rest)
-        @location = immutable_stringify(location)
+        @location = Chelsy.immutable_stringify(location)
         @system = !!system
 
         super **rest
@@ -1246,7 +1246,7 @@ module Chelsy
 
       def initialize(lineno, filename=nil, **rest)
         @lineno = Syntax::Coercers::Int.ensure(lineno)
-        @filename = immutable_stringify(filename) if filename
+        @filename = Chelsy.immutable_stringify(filename) if filename
 
         super **rest
       end
@@ -1257,7 +1257,7 @@ module Chelsy
       attr_reader :pragma
 
       def initialize(pragma, **rest)
-        @pragma = immutable_stringify(pragma)
+        @pragma = Chelsy.immutable_stringify(pragma)
         super **rest
       end
     end
