@@ -767,4 +767,18 @@ PROG
     assert_equal 'int (*apfi[3])(int x, int y)', translator.translate(d)
   end
 
+  def test_coerce_compound_stmt
+    stmt = If.new(
+      Operator::LessThan.new(:x, 0),
+      [Return.new(1)],
+      [Return.new(2)])
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+if (x < 0) {
+    return 1;
+} else {
+    return 2;
+}
+PROG
+  end
+
 end

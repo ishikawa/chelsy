@@ -1297,6 +1297,10 @@ module Chelsy
       Param = Coercer.new(Chelsy::Param) do |value|
         Chelsy::Param.new(*value) if ::Array === value
       end
+
+      Block = Coercer.new(Chelsy::Block) do |value|
+        Chelsy::Block.new(value) if ::Array === value
+      end
     end
 
     TopLevel = Any.new('TopLevel', [Declarative])
@@ -1323,7 +1327,8 @@ module Chelsy
     Initializer = Any.new('Initializer', [Syntax::Expr, Chelsy::Initializer, Chelsy::InitializerList])
     Stmt = Any.new('Statement', [
                     Syntax::Expr, # Treats Expr as Expression Statement
-                    Chelsy::Stmt])
+                    Chelsy::Stmt,
+                    Coercers::Block])
     BlockItem   = Any.new('BlockItem', [
                     Syntax::Stmt,
                     Chelsy::Declarative])
