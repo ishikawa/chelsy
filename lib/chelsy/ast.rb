@@ -982,9 +982,18 @@ module Chelsy
   class Switch < Stmt
     attr_reader :expr, :stmt
 
-    def initialize(expr, stmt, **rest)
+    def initialize(expr, stmt=nil, **rest, &block)
       @expr = Syntax::Expr.ensure(expr)
-      @stmt = Syntax::Stmt.ensure(stmt)
+
+      if stmt
+        @stmt = Syntax::Stmt.ensure(stmt)
+      elsif block
+        @stmt = Block.new
+        block.call(@stmt)
+      else
+        raise ArgumentError, "missing body statement"
+      end
+
       super **rest
     end
   end

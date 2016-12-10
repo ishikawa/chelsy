@@ -781,4 +781,22 @@ if (x < 0) {
 PROG
   end
 
+  def test_coerce_compound_stmt_in_switch_stmt
+    stmt = Switch.new(:x) do |b|
+      b << Case.new(1, Operator::PostfixIncrement.new(:x))
+      b << Break.new
+      b << Labeled.new(:default, Break.new)
+    end
+
+    assert_equal <<PROG, translator.translate(stmt) + "\n"
+switch (x) {
+case 1:
+    x++;
+    break;
+default:
+    break;
+}
+PROG
+  end
+
 end
