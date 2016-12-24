@@ -105,6 +105,7 @@ PROG
   end
 
   def test_struct_types
+    # int member
     ty = Type::Struct.new(:tnode)
     assert_equal 'struct tnode', translator.translate(ty)
 
@@ -117,6 +118,15 @@ struct s {
 }
 PROG
 
+    # typedef
+    ty = Typedef.new(:t, ty)
+    assert_equal <<PROG, translator.translate(ty) + "\n"
+typedef struct s {
+    int n;
+} t
+PROG
+
+    # int, double[] member
     ty = Type::Struct.new(:s, [
         Declaration.new(:n, Type::Int.new),
         Declaration.new(:d, Type::Array.new(Type::Double.new)),

@@ -665,12 +665,14 @@ module Chelsy
                   when Type::Enum;   'enum'
                   end
         buffer << ty.tag if ty.tag
-        buffer << name if name
       end
       .join(' ')
       .tap do |src|
         if ty.members
           src << ' ' << translate_taggable_members(ty.members)
+        end
+        if name
+          src << ' ' << name.to_s
         end
       end
     end
