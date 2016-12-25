@@ -152,13 +152,18 @@ module Chelsy
       end
     end
 
-    def translate_document(node)
-      node.map {|nd| translate(nd) }
+    def translate_document(doc)
+      doc
+      .map {|node|
+        src = translate(node)
+        src << ';' if should_terminate_with_semicolon(node)
+        src
+      }
       .join("\n\n")
       .tap do |src|
         # Document's fragments and body should be separated by empty line for
         # source code readability.
-        src.insert(0, "\n") unless src.empty? || node.fragments.empty?
+        src.insert(0, "\n") unless src.empty? || doc.fragments.empty?
       end
     end
 
@@ -716,8 +721,11 @@ module Chelsy
         end
       when While, For
         should_terminate_with_semicolon(node.body)
-      when Block
+      when Labeled
+        should_terminate_with_semicolon(node.stmt)
+      when Block, Function
         false
+      when Directive::Base, Comment::Base, Raw
       else
         true
       end
