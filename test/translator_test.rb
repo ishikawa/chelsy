@@ -740,7 +740,15 @@ int f2(void) {
     return 2;
 }
 PROG
+  end
 
+  def test_document_with_declaration
+    doc = Document.new
+    doc << Declaration.new(:N, Type::Int.new, 1, storage: :static)
+
+    assert_equal <<PROG, translator.translate(doc) + "\n"
+static int N = 1;
+PROG
   end
 
   ## Coerces Ruby objects to Node objects
